@@ -124,7 +124,8 @@ export default function CombatView({ onOpenSheet }) {
     }
     if (moveInfo.loss > 0 && !hint) hint = `¡Placado! Salir de aquí cuesta ${moveInfo.loss} PM.`;
   } else if (rangeMap) {
-    for (const [k, c] of rangeMap) highlights.classes[k] = c.valid ? 'range' : 'range-off';
+    // Azul intenso: objetivo válido. Azul claro: en alcance con visión. Gris: sin visión.
+    for (const [k, c] of rangeMap) highlights.classes[k] = c.valid ? 'range-valid' : /visión/.test(c.reason ?? '') ? 'range-off' : 'range';
     if (hover) {
       const rc = rangeMap.get(key(hover.x, hover.y));
       if (rc?.valid) {

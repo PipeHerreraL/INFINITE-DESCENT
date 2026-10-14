@@ -154,9 +154,13 @@
 }
 
 .cell-hl.range {
-  fill: rgba(70, 150, 255, 0.4);
-  stroke: rgba(30, 90, 200, 0.75);
-  stroke-width: 1;
+  fill: rgba(70, 150, 255, 0.26);
+}
+
+.cell-hl.range-valid {
+  fill: rgba(60, 140, 255, 0.55);
+  stroke: #1f5fc4;
+  stroke-width: 2;
 }
 
 .cell-hl.range-off {
