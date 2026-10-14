@@ -232,12 +232,11 @@ No se ha sustituido nada por funcionalidad falsa. Lo que falta, documentado:
 - **Consumibles en combate:** no hay pociones usables durante el combate; la
   curación se compra en el mercader.
 - **Audio:** sin música ni efectos de sonido.
-- **Arte:** los héroes y 8 monstruos tienen ilustración (IA de imágenes de Canva,
-  recortada con `scripts/sprites/cut_sheet.py`); Setita, Gólem Ancestral y Bramador
-  reutilizan una de ellas con otro color de forma provisional. Siguen en SVG
-  geométrico Plumín, Plumín Alfa, Larvazul, Bloblín, las arañas, la Sombra, el
-  Conejito, el saco de huevos, la Tejedora, las bombas y el mercader: faltan sus
-  ilustraciones (se agotaron los créditos de generación del plan gratuito).
+- **Arte:** los héroes y 16 monstruos tienen ilustración propia (IA de imágenes de
+  Canva, recortada con `scripts/sprites/cut_sheet.py`). Setita, Bloblín pequeño,
+  Arañita, Bramador y la Tejedora reutilizan una ilustración con otro color o tamaño
+  de forma provisional: los dos jefes merecen arte propio cuando haya créditos de
+  generación. Siguen en SVG el saco de huevos, las bombas y el mercader.
 - **Móvil:** la interfaz se adapta a móvil en vertical y en horizontal y a pantallas
   táctiles (ver sección 9). No hay modo sin conexión (no se usa *service worker*):
   la primera carga necesita red.

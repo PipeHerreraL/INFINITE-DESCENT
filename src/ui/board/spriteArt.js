@@ -23,13 +23,23 @@ const ART = {
   golemMusgo: { h: 60 },
   koboldChispero: { h: 54 },
   brujoKobold: { h: 54 },
+  plumin: { h: 38 },
+  pluminAlfa: { h: 48 },
+  larvazul: { h: 38 },
+  bloblin: { h: 36 },
+  aranaTejedora: { h: 40 },
+  sombraOnirica: { h: 52, lift: 6 },
+  golemAncestral: { h: 62 },
+  conejoSanador: { h: 40 },
 };
 
-// Variantes provisionales: reutilizan una ilustración con otro tamaño o color.
+// Variantes provisionales: reutilizan una ilustración con otro color (y altura `h`, si se indica).
 const VARIANTS = {
   setita: { from: 'setaBruja', filter: 'hue-rotate(275deg) saturate(1.2)' },
-  golemAncestral: { from: 'golemMusgo', filter: 'saturate(0.25) brightness(0.92) contrast(1.1)' },
+  bloblinMini: { from: 'bloblin', filter: 'brightness(1.12) saturate(0.85)' },
+  aranita: { from: 'aranaTejedora', filter: 'saturate(0.5) brightness(1.2)' },
   bramador: { from: 'jabaliAcorazado', filter: 'sepia(0.25) saturate(1.5) hue-rotate(-12deg) brightness(0.85)' },
+  tejedora: { from: 'aranaTejedora', h: 54, filter: 'hue-rotate(45deg) saturate(1.4) brightness(0.9)' },
 };
 
 // Los héroes se identifican por la forma de su clase.
@@ -44,7 +54,7 @@ export function artFor(sprite) {
   const base = ART[variant?.from ?? id];
   const src = url(variant?.from ?? id);
   if (!base || !src) return null;
-  return { ...base, url: src, filter: variant?.filter ?? null };
+  return { ...base, h: variant?.h ?? base.h, url: src, filter: variant?.filter ?? null };
 }
 
 export const SPRITE_ART_IDS = [...Object.keys(ART), ...Object.keys(VARIANTS)];

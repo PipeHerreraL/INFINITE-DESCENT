@@ -7,14 +7,14 @@ export const MONSTERS = {
   // ── Praderas del Ensueño
   plumin: {
     id: 'plumin', name: 'Plumín', family: 'Aves', tier: 'normal', cost: 1, xp: 4,
-    sprite: { shape: 'bird', color: '#f7d046', accent: '#f08c2e' },
+    sprite: { art: 'plumin', shape: 'bird', color: '#f7d046', accent: '#f08c2e' },
     desc: 'Pajarillo nervioso. Rápido, frágil y muy molesto.',
     stats: { hp: 22, ap: 4, mp: 4, lock: 6, dodge: 18, initiative: 130, resAir: 10 },
     spells: ['picotazo'], ai: { profile: 'melee' },
   },
   larvazul: {
     id: 'larvazul', name: 'Larvazul', family: 'Larvas', tier: 'normal', cost: 1.5, xp: 5,
-    sprite: { shape: 'larva', color: '#5aa9e6', accent: '#2c6e9b' },
+    sprite: { art: 'larvazul', shape: 'larva', color: '#5aa9e6', accent: '#2c6e9b' },
     desc: 'Lenta y resistente. Su mordisco envenena.',
     stats: { hp: 34, ap: 4, mp: 2, lock: 12, dodge: 5, initiative: 60, resWater: 15, resEarth: 5 },
     spells: ['mordiscoViscoso'], ai: { profile: 'melee' },
@@ -35,7 +35,7 @@ export const MONSTERS = {
   },
   bloblin: {
     id: 'bloblin', name: 'Bloblín', family: 'Gelatinas', tier: 'normal', cost: 1.5, xp: 5,
-    sprite: { shape: 'blob', color: '#7bd389', accent: '#3a7d44' },
+    sprite: { art: 'bloblin', shape: 'blob', color: '#7bd389', accent: '#3a7d44' },
     desc: 'Al morir se divide en dos bloblines pequeños.',
     stats: { hp: 28, ap: 4, mp: 3, lock: 8, dodge: 8, initiative: 70, resWater: 10, resFire: -10 },
     spells: ['salpicon'], ai: { profile: 'melee' },
@@ -46,7 +46,7 @@ export const MONSTERS = {
   },
   pluminAlfa: {
     id: 'pluminAlfa', name: 'Plumín Alfa', family: 'Aves', tier: 'elite', cost: 4, xp: 14,
-    sprite: { shape: 'bird', color: '#ff9f1c', accent: '#d62828', crest: true },
+    sprite: { art: 'pluminAlfa', shape: 'bird', color: '#ff9f1c', accent: '#d62828', crest: true },
     desc: 'Líder de bandada. Su graznido enardece a los suyos.',
     stats: { hp: 58, ap: 6, mp: 5, lock: 12, dodge: 25, initiative: 150, resAir: 15 },
     spells: ['picotazoAlfa', 'graznido'], ai: { profile: 'melee' },
@@ -98,14 +98,14 @@ export const MONSTERS = {
   },
   aranaTejedora: {
     id: 'aranaTejedora', name: 'Arácnida Tejedora', family: 'Arácnidos', tier: 'normal', cost: 2, xp: 8,
-    sprite: { shape: 'spider', color: '#3d405b', accent: '#e07a5f' },
+    sprite: { art: 'aranaTejedora', shape: 'spider', color: '#3d405b', accent: '#e07a5f' },
     desc: 'Enreda a sus presas para que no escapen.',
     stats: { hp: 34, ap: 5, mp: 3, lock: 18, dodge: 12, initiative: 110, resAir: 10, resEarth: 10 },
     spells: ['redPegajosa', 'mordiscoArana'], ai: { profile: 'ranged', preferredRange: 2 },
   },
   sombraOnirica: {
     id: 'sombraOnirica', name: 'Sombra Onírica', family: 'Sombras', tier: 'normal', cost: 1.5, xp: 7,
-    sprite: { shape: 'shade', color: '#5e548e', accent: '#e0b1cb' },
+    sprite: { art: 'sombraOnirica', shape: 'shade', color: '#5e548e', accent: '#e0b1cb' },
     desc: 'Parpadea por el tablero. Difícil de placar.',
     stats: { hp: 26, ap: 6, mp: 4, lock: 6, dodge: 40, initiative: 125, resNeutral: 20 },
     spells: ['golpeSombrio', 'parpadeo'], ai: { profile: 'melee' },
@@ -138,7 +138,7 @@ export const MONSTERS = {
   // ── Invocaciones
   conejoSanador: {
     id: 'conejoSanador', name: 'Conejito Sanador', family: 'Invocaciones', tier: 'summon', xp: 0,
-    sprite: { shape: 'bunny', color: '#ffffff', accent: '#ffafcc' },
+    sprite: { art: 'conejoSanador', shape: 'bunny', color: '#ffffff', accent: '#ffafcc' },
     desc: 'Cura a los aliados heridos.',
     stats: { hp: 30, ap: 4, mp: 3, lock: 0, dodge: 20, initiative: 50 },
     spells: ['curaConejo'], ai: { profile: 'support', preferredRange: 3, healer: true },
@@ -152,13 +152,13 @@ export const MONSTERS = {
   },
   bloblinMini: {
     id: 'bloblinMini', name: 'Bloblín pequeño', family: 'Gelatinas', tier: 'summon', xp: 1,
-    sprite: { shape: 'blob', color: '#a7e8b0', accent: '#3a7d44', small: true },
+    sprite: { art: 'bloblinMini', shape: 'blob', color: '#a7e8b0', accent: '#3a7d44', small: true },
     stats: { hp: 10, ap: 3, mp: 3, lock: 2, dodge: 5, initiative: 60 },
     spells: ['salpiconMini'], ai: { profile: 'melee' },
   },
   aranita: {
     id: 'aranita', name: 'Arañita', family: 'Arácnidos', tier: 'summon', xp: 1,
-    sprite: { shape: 'spider', color: '#6d6875', accent: '#e5989b', small: true },
+    sprite: { art: 'aranita', shape: 'spider', color: '#6d6875', accent: '#e5989b', small: true },
     stats: { hp: 14, ap: 4, mp: 4, lock: 6, dodge: 10, initiative: 90 },
     spells: ['mordiscoAranita'], ai: { profile: 'melee' },
   },
@@ -195,7 +195,7 @@ export const MONSTERS = {
   },
   tejedora: {
     id: 'tejedora', name: 'La Tejedora de Pesadillas', family: 'Arácnidos', tier: 'boss', xp: 90,
-    sprite: { shape: 'spider', color: '#22223b', accent: '#c77dff', big: true, boss: true },
+    sprite: { art: 'tejedora', shape: 'spider', color: '#22223b', accent: '#c77dff', big: true, boss: true },
     desc: 'Teje redes anunciadas que atrapan a quien se quede dentro y pone sacos de huevos que eclosionan en 2 turnos. Destrúyelos o te verás rodeado. Al 50% entra en Pesadilla.',
     stats: { hp: 250, ap: 8, mp: 3, lock: 25, dodge: 20, initiative: 120, resAir: 20, resWater: 15, resEarth: 10, pushRes: 20 },
     spells: ['mordiscoVenenoso', 'hiloSeda', 'ponerHuevos', 'redTejida'],
