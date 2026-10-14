@@ -3,7 +3,7 @@ import { parseKey, key } from '../../core/grid/geometry.js';
 import { ELEMENTS } from '../../content/elements.js';
 import { STATUSES } from '../../content/statuses.js';
 import { totalShield } from '../../core/combat/state.js';
-import UnitSprite from './UnitSprite.jsx';
+import UnitSprite, { spriteTop } from './UnitSprite.jsx';
 import { baseView, clampCamera, viewFor, zoomAt, panBy, autoZoom, inView } from './camera.js';
 
 export const TW = 64;
@@ -518,7 +518,7 @@ export default function Board({
                   <UnitSprite sprite={isBomb ? { ...u.sprite, color: ELEMENTS[u.element]?.color ?? '#333' } : u.sprite} charge={u.charge} />
                 </g>
                 {!isBomb ? (
-                  <g transform={`translate(0 ${u.sprite?.boss ? -82 : u.sprite?.big ? -66 : u.sprite?.small ? -40 : -54})`}>
+                  <g transform={`translate(0 ${spriteTop(u.sprite)})`}>
                     <rect x="-19" y="-3" width="38" height="6" rx="2" fill="#1b1028" stroke="#000" strokeWidth="0.8" />
                     <rect x="-18" y="-2" width={Math.max(0, (36 * u.hp) / u.maxHp)} height="4" rx="1.5" fill={u.side === 'player' ? '#5fd35a' : '#ef4b3c'} />
                     {shield > 0 ? <rect x="-18" y="-2" width={Math.min(36, (36 * shield) / u.maxHp)} height="1.6" fill="#9ad1ff" /> : null}
@@ -535,7 +535,7 @@ export default function Board({
                   <text x="0" y="-26" textAnchor="middle" className="bomb-charge">{u.charge}</text>
                 )}
                 {pv ? (
-                  <text x="0" y={u.sprite?.boss ? -96 : -70} textAnchor="middle" className={`preview-label ${pv.heal && !pv.dmgMax ? 'heal' : ''}`}>
+                  <text x="0" y={spriteTop(u.sprite) - 16} textAnchor="middle" className={`preview-label ${pv.heal && !pv.dmgMax ? 'heal' : ''}`}>
                     {pv.dmgMax ? `−${pv.dmgMin}–${pv.dmgMax}` : `+${Math.round(pv.heal)}`}
                   </text>
                 ) : null}
@@ -574,7 +574,8 @@ export default function Board({
             if (at?.x === undefined) return null;
             const { px, py } = project(at.x, at.y);
             const style = { animationDelay: `${f.delay}ms` };
-            const lift = (f.row ?? 0) * 15;
+            // Los textos de cada unidad salen a la altura de su sprite (54 = sprite estándar).
+          const lift = (f.row ?? 0) * 15 - (u ? spriteTop(u.sprite) + 54 : 0);
             switch (f.type) {
               case 'damage':
                 return (

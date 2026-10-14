@@ -6,9 +6,11 @@ roguelikes modernos. Cada expedición es una *build* distinta: equipo con rareza
 encantamientos, sets, reliquias, variantes de hechizo, runas y talentos que se
 combinan mediante un sistema de disparadores.
 
-> Proyecto de fans e independiente. No usa recursos oficiales de Ankama: el arte es
-> SVG geométrico original y todos los nombres de clases, monstruos y objetos son
-> propios. Cada clase indica en qué arquetipo de Dofus se inspira.
+> Proyecto de fans e independiente. No usa recursos oficiales de Ankama: los
+> personajes ilustrados son diseños originales generados con la IA de imágenes de
+> Canva (ver `src/assets/sprites` y `scripts/sprites/cut_sheet.py`), el resto del
+> arte es SVG geométrico original y todos los nombres de clases, monstruos y objetos
+> son propios. Cada clase indica en qué arquetipo de Dofus se inspira.
 
 ## Jugar en línea
 
@@ -127,6 +129,18 @@ Principios:
   código específico para cada combinación.
 - **La IA usa las mismas reglas que el jugador.** Toda decisión pasa por `canCast` y
   `movementMap`.
+
+### Sprites ilustrados
+
+1. Genera una hoja con varios personajes sobre **fondo blanco liso**, separados y sin
+   sombras en el suelo (así se hicieron con la IA de imágenes de Canva).
+2. Recórtala: `python3 scripts/sprites/cut_sheet.py hoja.png nombre1 nombre2 ...`
+   (de izquierda a derecha; `--cut "x,y x,y"` separa dos personajes que se tocan).
+   Necesita Pillow y numpy.
+3. Registra cada nombre en `src/ui/board/spriteArt.js` con su altura en el tablero y
+   pon `art: 'nombre'` en el `sprite` del monstruo. Sin ilustración, la unidad usa su
+   sprite vectorial.
+4. `npm run dev` y abre `/sprites.html` para ver toda la galería sobre una casilla.
 
 ### Añadir contenido
 

@@ -21,14 +21,14 @@ export const MONSTERS = {
   },
   setaBruja: {
     id: 'setaBruja', name: 'Seta Bruja', family: 'Setas', tier: 'normal', cost: 1.5, xp: 5,
-    sprite: { shape: 'mushroom', color: '#c0392b', accent: '#f5e6c8' },
+    sprite: { art: 'setaBruja', shape: 'mushroom', color: '#c0392b', accent: '#f5e6c8' },
     desc: 'Mantiene la distancia, frena con esporas y cura a sus aliados.',
     stats: { hp: 26, ap: 6, mp: 2, lock: 4, dodge: 8, initiative: 80, resEarth: 10, resAir: 5 },
     spells: ['esporas', 'esporasCurativas'], ai: { profile: 'support', preferredRange: 4 },
   },
   jabalinete: {
     id: 'jabalinete', name: 'Jabalinete', family: 'Jabalíes', tier: 'normal', cost: 2, xp: 6,
-    sprite: { shape: 'boar', color: '#8d5a3b', accent: '#e9d8a6' },
+    sprite: { art: 'jabalinete', shape: 'boar', color: '#8d5a3b', accent: '#e9d8a6' },
     desc: 'Embiste en línea recta. No te quedes alineado.',
     stats: { hp: 34, ap: 7, mp: 3, lock: 15, dodge: 8, initiative: 95, resEarth: 10, resNeutral: 10 },
     spells: ['embestida', 'cornada'], ai: { profile: 'melee' },
@@ -53,7 +53,7 @@ export const MONSTERS = {
   },
   jabaliAcorazado: {
     id: 'jabaliAcorazado', name: 'Jabalí Acorazado', family: 'Jabalíes', tier: 'elite', cost: 4, xp: 15,
-    sprite: { shape: 'boar', color: '#5c4033', accent: '#b0b0b0', armor: true },
+    sprite: { art: 'jabaliAcorazado', shape: 'boar', color: '#5c4033', accent: '#b0b0b0', armor: true },
     desc: 'Se cubre de corteza al inicio de cada turno.',
     stats: { hp: 82, ap: 7, mp: 3, lock: 25, dodge: 5, initiative: 85, resEarth: 15, resNeutral: 15 },
     spells: ['embestida', 'cornada'], ai: { profile: 'melee' },
@@ -64,7 +64,7 @@ export const MONSTERS = {
   },
   setaAnciana: {
     id: 'setaAnciana', name: 'Seta Anciana', family: 'Setas', tier: 'elite', cost: 4, xp: 15,
-    sprite: { shape: 'mushroom', color: '#6a4c93', accent: '#f1e3f3', big: true },
+    sprite: { art: 'setaAnciana', shape: 'mushroom', color: '#6a4c93', accent: '#f1e3f3', big: true },
     desc: 'Envenena el aire y hace germinar setitas.',
     stats: { hp: 64, ap: 7, mp: 1, lock: 10, dodge: 5, initiative: 70, resEarth: 15, resWater: 10 },
     spells: ['esporaToxica', 'invocarSetita'], ai: { profile: 'summoner', preferredRange: 4 },
@@ -73,14 +73,14 @@ export const MONSTERS = {
   // ── Cavernas del Eco
   murcielagoEco: {
     id: 'murcielagoEco', name: 'Murciélago del Eco', family: 'Murciélagos', tier: 'normal', cost: 1.5, xp: 7,
-    sprite: { shape: 'bat', color: '#4a4e69', accent: '#c9184a' },
+    sprite: { art: 'murcielagoEco', shape: 'bat', color: '#4a4e69', accent: '#c9184a' },
     desc: 'Se cura con cada mordisco.',
     stats: { hp: 30, ap: 5, mp: 5, lock: 8, dodge: 25, initiative: 140, resAir: 15 },
     spells: ['mordiscoVampiro'], ai: { profile: 'melee' },
   },
   golemMusgo: {
     id: 'golemMusgo', name: 'Gólem de Musgo', family: 'Gólems', tier: 'normal', cost: 2.5, xp: 9,
-    sprite: { shape: 'golem', color: '#6a994e', accent: '#a7c957' },
+    sprite: { art: 'golemMusgo', shape: 'golem', color: '#6a994e', accent: '#a7c957' },
     desc: 'Lento e inamovible. Golpea fuerte y aparta.',
     stats: { hp: 62, ap: 5, mp: 2, lock: 30, dodge: 0, initiative: 40, resEarth: 20, resNeutral: 15, pushRes: 20 },
     spells: ['punetazo'], ai: { profile: 'melee' },
@@ -91,7 +91,7 @@ export const MONSTERS = {
   },
   koboldChispero: {
     id: 'koboldChispero', name: 'Kobold Chispero', family: 'Kobolds', tier: 'normal', cost: 2, xp: 8,
-    sprite: { shape: 'kobold', color: '#e76f51', accent: '#f4a261' },
+    sprite: { art: 'koboldChispero', shape: 'kobold', color: '#e76f51', accent: '#f4a261' },
     desc: 'Lanza chispas desde lejos y huye del cuerpo a cuerpo.',
     stats: { hp: 30, ap: 6, mp: 3, lock: 5, dodge: 15, initiative: 100, resFire: 15 },
     spells: ['chispa'], ai: { profile: 'ranged', preferredRange: 4 },
@@ -112,7 +112,7 @@ export const MONSTERS = {
   },
   golemAncestral: {
     id: 'golemAncestral', name: 'Gólem Ancestral', family: 'Gólems', tier: 'elite', cost: 5, xp: 22,
-    sprite: { shape: 'golem', color: '#495057', accent: '#ffd166', big: true },
+    sprite: { art: 'golemAncestral', shape: 'golem', color: '#495057', accent: '#ffd166', big: true },
     desc: 'Una montaña que camina. Se acoraza y aplasta en área.',
     stats: { hp: 140, ap: 6, mp: 2, lock: 35, dodge: 0, initiative: 50, resEarth: 25, resNeutral: 20, resFire: 10, pushRes: 30 },
     spells: ['punetazoTelurico'], ai: { profile: 'melee' },
@@ -129,7 +129,7 @@ export const MONSTERS = {
   },
   brujoKobold: {
     id: 'brujoKobold', name: 'Brujo Kobold', family: 'Kobolds', tier: 'elite', cost: 5, xp: 22,
-    sprite: { shape: 'kobold', color: '#9d0208', accent: '#ffba08', big: true },
+    sprite: { art: 'brujoKobold', shape: 'kobold', color: '#9d0208', accent: '#ffba08', big: true },
     desc: 'Bombardea con fuego y llama refuerzos.',
     stats: { hp: 78, ap: 8, mp: 3, lock: 10, dodge: 15, initiative: 105, resFire: 20, resWater: -10 },
     spells: ['bolaFuego', 'invocarKobold'], ai: { profile: 'summoner', preferredRange: 4 },
@@ -146,7 +146,7 @@ export const MONSTERS = {
   },
   setita: {
     id: 'setita', name: 'Setita', family: 'Setas', tier: 'summon', xp: 1,
-    sprite: { shape: 'mushroom', color: '#9b5de5', accent: '#f1e3f3', small: true },
+    sprite: { art: 'setita', shape: 'mushroom', color: '#9b5de5', accent: '#f1e3f3', small: true },
     stats: { hp: 16, ap: 4, mp: 3, lock: 4, dodge: 5, initiative: 40 },
     spells: ['picadura'], ai: { profile: 'melee' },
   },
@@ -177,7 +177,7 @@ export const MONSTERS = {
   // ── Jefes
   bramador: {
     id: 'bramador', name: 'Bramador, el Jabalí Ancestral', family: 'Jabalíes', tier: 'boss', xp: 60,
-    sprite: { shape: 'boar', color: '#6b2d1a', accent: '#ffd166', big: true, boss: true },
+    sprite: { art: 'bramador', shape: 'boar', color: '#6b2d1a', accent: '#ffd166', big: true, boss: true },
     desc: 'Anuncia sus cargas con una línea roja. Si se estrella contra un pilar queda aturdido y vulnerable. Por debajo del 50% de vida entra en furia, llama a una cría y hace temblar el suelo.',
     stats: { hp: 230, ap: 6, mp: 3, lock: 30, dodge: 10, initiative: 80, resEarth: 15, resNeutral: 15, resFire: 5, pushRes: 25 },
     spells: ['colmillo', 'bramido', 'cargaBramador'],

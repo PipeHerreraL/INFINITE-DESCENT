@@ -1,5 +1,7 @@
-// Sprites geométricos originales. Origen (0, 0) = centro de la casilla en el suelo.
-// Todos miran hacia la cámara; el tamaño base ronda los 44 px de alto.
+// Sprites de las unidades. Origen (0, 0) = centro de la casilla en el suelo.
+// Si la unidad tiene ilustración (spriteArt.js) se dibuja esa imagen; si no, el
+// sprite geométrico de este archivo. Todos miran hacia la cámara.
+import { artFor } from './spriteArt.js';
 
 function Eyes({ y = -20, spread = 5, r = 2.6, color = '#1b1b1b', angry = false }) {
   return (
@@ -257,9 +259,49 @@ const SHAPES = {
   bomb: BombSprite,
 };
 
-export default function UnitSprite({ sprite, charge }) {
+function spriteScale(sprite) {
+  return sprite?.boss ? 1.55 : sprite?.big ? 1.25 : sprite?.small ? 0.72 : 1;
+}
+
+/** Altura de la parte superior del sprite (y negativa), para la barra de vida y los textos. */
+export function spriteTop(sprite) {
+  const scale = spriteScale(sprite);
+  const art = sprite?.shape === 'bomb' ? null : artFor(sprite);
+  if (art) return -((art.h + (art.lift ?? 0)) * scale + 2);
+  return sprite?.boss ? -82 : sprite?.big ? -66 : sprite?.small ? -40 : -54;
+}
+
+/**
+ * Ilustración anclada por los pies al centro de la casilla. `maxW` limita el
+ * ancho (relativo a la altura): las más anchas se encogen para caber.
+ */
+function ArtSprite({ art, maxW }) {
+  const h = art.h;
+  const w = h * maxW;
+  return (
+    <image
+      href={art.url}
+      x={-w / 2}
+      y={-h + 4 - (art.lift ?? 0)}
+      width={w}
+      height={h}
+      preserveAspectRatio="xMidYMax meet"
+      style={art.filter ? { filter: art.filter } : undefined}
+    />
+  );
+}
+
+export default function UnitSprite({ sprite, charge, maxW = 2 }) {
+  const scale = spriteScale(sprite);
+  const art = sprite?.shape === 'bomb' ? null : artFor(sprite);
+  if (art) {
+    return (
+      <g transform={`scale(${scale})`}>
+        <ArtSprite art={art} maxW={maxW} />
+      </g>
+    );
+  }
   const Shape = SHAPES[sprite?.shape] ?? Blob;
-  const scale = sprite?.boss ? 1.55 : sprite?.big ? 1.25 : sprite?.small ? 0.72 : 1;
   return (
     <g transform={`scale(${scale})`}>
       <Shape color={sprite?.color ?? '#999'} accent={sprite?.accent ?? '#555'} crest={sprite?.crest} armor={sprite?.armor} charge={charge} />
@@ -269,7 +311,17 @@ export default function UnitSprite({ sprite, charge }) {
 
 /** Retrato pequeño para listas (línea de turnos, cartas). */
 export function Portrait({ sprite, size = 40, charge }) {
-  const scale = sprite?.boss ? 1.55 : sprite?.big ? 1.25 : sprite?.small ? 0.72 : 1;
+  const scale = spriteScale(sprite);
+  const art = sprite?.shape === 'bomb' ? null : artFor(sprite);
+  if (art) {
+    // Encuadre cuadrado: la ilustración completa, de los pies a la cabeza.
+    const h = (art.h + (art.lift ?? 0)) * scale;
+    return (
+      <svg width={size} height={size} viewBox={`${-h / 2 - 1} ${-h + 2} ${h + 2} ${h + 4}`} aria-hidden="true">
+        <UnitSprite sprite={sprite} charge={charge} maxW={1} />
+      </svg>
+    );
+  }
   const h = 52 * scale;
   return (
     <svg width={size} height={size} viewBox={`-28 ${-h - 2} 56 ${h + 8}`} aria-hidden="true">
