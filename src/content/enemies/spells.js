@@ -138,17 +138,24 @@ export const MONSTER_SPELLS = {
   // ── Jefe: Bramador
   colmillo: {
     id: 'colmillo', name: 'Colmillo Ancestral', icon: 'fang', element: 'earth',
-    apCost: 4, minRange: 1, maxRange: 1, los: true, target: 'enemy', castsPerTurn: 2,
-    effects: [{ type: 'damage', element: 'earth', min: 11, max: 14 }],
+    apCost: 4, minRange: 1, maxRange: 1, los: true, target: 'enemy', castsPerTurn: 1,
+    effects: [{ type: 'damage', element: 'earth', min: 12, max: 15 }],
+  },
+  bramido: {
+    id: 'bramido', name: 'Bramido', icon: 'shout', element: 'neutral',
+    desc: 'Aturde de miedo: quita 2 PM a los enemigos cercanos.',
+    apCost: 2, minRange: 0, maxRange: 0, los: false, target: 'self', castsPerTurn: 1, cooldown: 3,
+    area: { shape: 'circle', size: 2 },
+    effects: [{ type: 'mp', value: -2 }],
   },
   cargaBramador: {
     id: 'cargaBramador', name: 'Carga Ancestral', icon: 'push', element: 'earth',
     desc: 'Anuncia una carga en línea recta que se ejecuta al inicio de su próximo turno. Si choca contra un obstáculo queda Aturdido.',
-    apCost: 0, minRange: 1, maxRange: 20, los: false, target: 'cell', castsPerTurn: 1,
+    apCost: 0, minRange: 1, maxRange: 20, los: false, target: 'cell', castsPerTurn: 1, cooldown: 2,
     telegraph: { kind: 'charge' },
     effects: [{
       type: 'charge',
-      hit: [{ type: 'damage', element: 'earth', min: 20, max: 24 }, { type: 'push', distance: 2 }],
+      hit: [{ type: 'damage', element: 'earth', min: 16, max: 20 }, { type: 'push', distance: 2 }],
       wallSelfDamage: 25,
       wallStatus: [{ status: 'aturdido', duration: 1 }, { status: 'vulnerable', value: 25, duration: 2 }],
     }],
@@ -156,17 +163,17 @@ export const MONSTER_SPELLS = {
   temblor: {
     id: 'temblor', name: 'Temblor', icon: 'quake', element: 'earth',
     desc: 'Marca una zona que se derrumba al inicio de su próximo turno.',
-    apCost: 0, minRange: 0, maxRange: 20, los: false, target: 'cell', castsPerTurn: 1,
+    apCost: 0, minRange: 0, maxRange: 20, los: false, target: 'cell', castsPerTurn: 1, cooldown: 2,
     area: { shape: 'circle', size: 2 },
     telegraph: { kind: 'area' },
-    effects: [{ type: 'damage', element: 'earth', min: 16, max: 20 }],
+    effects: [{ type: 'damage', element: 'earth', min: 14, max: 17 }],
   },
 
   // ── Jefe: Tejedora de Pesadillas
   mordiscoVenenoso: {
     id: 'mordiscoVenenoso', name: 'Mordisco Venenoso', icon: 'fang', element: 'water',
     apCost: 4, minRange: 1, maxRange: 1, los: true, target: 'enemy', castsPerTurn: 1,
-    effects: [{ type: 'damage', element: 'water', min: 12, max: 15 }, { type: 'status', status: 'veneno', value: 4, stacks: 1, duration: 3 }],
+    effects: [{ type: 'damage', element: 'water', min: 10, max: 13 }, { type: 'status', status: 'veneno', value: 4, stacks: 1, duration: 3 }],
   },
   hiloSeda: {
     id: 'hiloSeda', name: 'Hilo de Seda', icon: 'chain', element: 'air',
@@ -176,15 +183,15 @@ export const MONSTER_SPELLS = {
   redTejida: {
     id: 'redTejida', name: 'Red Tejida', icon: 'web', element: 'air',
     desc: 'Marca una zona en cruz: al inicio de su próximo turno atrapa y daña a quien siga dentro.',
-    apCost: 0, minRange: 0, maxRange: 20, los: false, target: 'cell', castsPerTurn: 1,
+    apCost: 0, minRange: 0, maxRange: 20, los: false, target: 'cell', castsPerTurn: 1, cooldown: 2,
     area: { shape: 'cross', size: 2 },
     telegraph: { kind: 'area' },
-    effects: [{ type: 'damage', element: 'air', min: 13, max: 16 }, { type: 'status', status: 'tejida', duration: 1 }],
+    effects: [{ type: 'damage', element: 'air', min: 11, max: 14 }, { type: 'status', status: 'tejida', duration: 1 }],
   },
   ponerHuevos: {
     id: 'ponerHuevos', name: 'Puesta', icon: 'egg', element: 'neutral',
     desc: 'Pone un saco de huevos que eclosiona en 2 turnos si no se destruye.',
-    apCost: 2, minRange: 1, maxRange: 6, los: false, target: 'emptyCell', castsPerTurn: 2, cooldown: 3,
+    apCost: 2, minRange: 1, maxRange: 6, los: false, target: 'emptyCell', castsPerTurn: 1, cooldown: 3,
     tags: ['summon'], effects: [{ type: 'summon', monster: 'huevoArana' }],
   },
 };

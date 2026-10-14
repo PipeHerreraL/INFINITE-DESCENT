@@ -25,7 +25,7 @@ export const ACTS = [
     ],
     elites: ['pluminAlfa', 'jabaliAcorazado', 'setaAnciana'],
     boss: 'bramador',
-    budget: { base: 2.6, perRow: 0.5 },
+    budget: { base: 3.0, perRow: 0.5 },
     maxEnemies: 4,
     nodeWeights: { combat: 44, event: 16, elite: 9, shop: 7, forge: 7, chest: 6, rest: 4, challenge: 7 },
   },

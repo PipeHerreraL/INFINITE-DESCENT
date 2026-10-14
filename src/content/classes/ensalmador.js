@@ -25,7 +25,7 @@ export const ENSALMADOR_SPELLS = {
     id: 'palabraHiriente', name: 'Palabra Hiriente', icon: 'bolt', element: 'fire',
     desc: 'Palabra cargada de fuego.',
     apCost: 3, minRange: 1, maxRange: 6, rangeMod: true, los: true, target: 'enemy', castsPerTurn: 2, crit: 5,
-    effects: [{ type: 'damage', element: 'fire', min: 11, max: 14 }],
+    effects: [{ type: 'damage', element: 'fire', min: 12, max: 15 }],
     variants: [
       {
         id: 'palabraVampirica', name: 'Palabra Vampírica', desc: 'Se vuelve de Agua y te cura el 50% del daño.',
@@ -38,7 +38,7 @@ export const ENSALMADOR_SPELLS = {
     desc: 'Daña y quita 1 PM al objetivo.',
     apCost: 4, minRange: 2, maxRange: 5, rangeMod: true, los: true, target: 'enemy', castsPerTurn: 1,
     effects: [
-      { type: 'damage', element: 'water', min: 14, max: 17 },
+      { type: 'damage', element: 'water', min: 15, max: 18 },
       { type: 'mp', value: -1 },
     ],
     variants: [

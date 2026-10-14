@@ -178,16 +178,16 @@ export const MONSTERS = {
   bramador: {
     id: 'bramador', name: 'Bramador, el Jabalí Ancestral', family: 'Jabalíes', tier: 'boss', xp: 60,
     sprite: { shape: 'boar', color: '#6b2d1a', accent: '#ffd166', big: true, boss: true },
-    desc: 'Anuncia sus cargas con una línea roja. Si se estrella contra un pilar queda aturdido y vulnerable. Por debajo del 50% de vida entra en furia, llama a sus crías y hace temblar el suelo.',
-    stats: { hp: 330, ap: 8, mp: 3, lock: 30, dodge: 10, initiative: 80, resEarth: 15, resNeutral: 15, resFire: 5, pushRes: 25 },
-    spells: ['colmillo', 'cargaBramador'],
+    desc: 'Anuncia sus cargas con una línea roja. Si se estrella contra un pilar queda aturdido y vulnerable. Por debajo del 50% de vida entra en furia, llama a una cría y hace temblar el suelo.',
+    stats: { hp: 230, ap: 6, mp: 3, lock: 30, dodge: 10, initiative: 80, resEarth: 15, resNeutral: 15, resFire: 5, pushRes: 25 },
+    spells: ['colmillo', 'bramido', 'cargaBramador'],
     ai: { profile: 'boss', telegraphs: ['cargaBramador'] },
     phases: [{
       hpBelowPct: 50, name: 'Furia Ancestral',
-      log: '¡Bramador entra en Furia Ancestral y llama a sus crías!',
+      log: '¡Bramador entra en Furia Ancestral y llama a una cría!',
       onEnter: [
         { type: 'status', target: 'self', status: 'furiaAncestral', duration: -1 },
-        { type: 'summon', monster: 'jabalinete', count: 2, target: 'aroundSelf' },
+        { type: 'summon', monster: 'jabalinete', count: 1, target: 'aroundSelf' },
       ],
       addSpells: ['temblor'],
       telegraphs: ['cargaBramador', 'temblor'],
@@ -197,7 +197,7 @@ export const MONSTERS = {
     id: 'tejedora', name: 'La Tejedora de Pesadillas', family: 'Arácnidos', tier: 'boss', xp: 90,
     sprite: { shape: 'spider', color: '#22223b', accent: '#c77dff', big: true, boss: true },
     desc: 'Teje redes anunciadas que atrapan a quien se quede dentro y pone sacos de huevos que eclosionan en 2 turnos. Destrúyelos o te verás rodeado. Al 50% entra en Pesadilla.',
-    stats: { hp: 430, ap: 8, mp: 3, lock: 25, dodge: 20, initiative: 120, resAir: 20, resWater: 15, resEarth: 10, pushRes: 20 },
+    stats: { hp: 250, ap: 8, mp: 3, lock: 25, dodge: 20, initiative: 120, resAir: 20, resWater: 15, resEarth: 10, pushRes: 20 },
     spells: ['mordiscoVenenoso', 'hiloSeda', 'ponerHuevos', 'redTejida'],
     ai: { profile: 'boss', telegraphs: ['redTejida'], preferredRange: 2 },
     phases: [{

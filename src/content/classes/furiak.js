@@ -142,7 +142,7 @@ export const FURIAK = {
   desc: 'Se lanza al cuerpo a cuerpo, salta sobre el campo y acumula Ira con cada golpe. Recompensa la agresividad y el posicionamiento.',
   playstyle: ['Daño directo', 'Cuerpo a cuerpo', 'Empujes'],
   baseStats: {
-    hp: 125, ap: 6, mp: 3, range: 0, strength: 20, intelligence: 10,
+    hp: 135, ap: 6, mp: 3, range: 0, strength: 20, intelligence: 10,
     crit: 5, lock: 15, dodge: 12, initiative: 110, summons: 1, rageMax: 5,
   },
   hpPerLevel: 8,

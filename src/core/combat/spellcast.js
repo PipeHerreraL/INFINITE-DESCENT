@@ -155,7 +155,7 @@ export function castSpell(combat, caster, spellId, cell) {
   const element = spell.element === 'dominant' ? caster.dominantElement : spell.element;
 
   addFx(combat, { type: 'cast', unitId: caster.id, text: spell.name, x: cell.x, y: cell.y, crit: isCrit });
-  addLog(combat, `${caster.name} lanza ${spell.name}${isCrit ? ' — ¡golpe crítico!' : ''}.`, caster.side === 'player' ? 'cast' : 'enemy');
+  addLog(combat, `${caster.name} lanza ${spell.name}${isCrit ? ' — ¡golpe crítico!' : '.'}`, caster.side === 'player' ? 'cast' : 'enemy');
   challengeEvent(combat, 'cast', { unit: caster, spell });
 
   if (spell.telegraph) {

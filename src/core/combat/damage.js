@@ -127,7 +127,7 @@ export function applyDamage(combat, opts) {
 
   addFx(combat, { type: 'damage', unitId: target.id, value: total, absorbed, element, crit: isCrit });
   const srcName = source ? source.name : opts.label ?? 'El sueño';
-  addLog(combat, `${srcName} → ${target.name}: ${total} de daño${absorbed ? ` (${absorbed} absorbido)` : ''}${isCrit ? ' ¡crítico!' : ''}.`, target.side === 'player' ? 'hurt' : 'hit');
+  addLog(combat, `${srcName} → ${target.name}: ${total} de daño${absorbed ? ` (${absorbed} absorbido)` : ''}${isCrit ? ' ¡crítico!' : '.'}`, target.side === 'player' ? 'hurt' : 'hit');
 
   if (source && source.side === 'player' && target.side === 'enemy') combat.stats.damageDealt += total;
   if (target.id === combat.heroId) combat.stats.damageTaken += total;

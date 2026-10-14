@@ -10,9 +10,9 @@ import { TRIGGER_BUDGET } from './triggers.js';
  */
 export function enemyScaling(floor, rules = {}, extra = 0) {
   return {
-    hpMult: (1 + 0.1 * (floor - 1)) * (1 + (rules.enemyHpPct ?? 0) / 100) * (1 + 0.3 * extra),
+    hpMult: (1 + 0.09 * (floor - 1)) * (1 + (rules.enemyHpPct ?? 0) / 100) * (1 + 0.3 * extra),
     eliteHpMult: 1 + (rules.eliteHpPct ?? 0) / 100,
-    power: 6 * (floor - 1) + 20 * extra,
+    power: 5 * (floor - 1) + 20 * extra,
     dmgPct: rules.enemyDmgPct ?? 0,
   };
 }

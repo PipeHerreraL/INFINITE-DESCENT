@@ -208,7 +208,7 @@ function threatenedCells(combat, unit) {
 
 function positionScore(combat, unit, cell, threatened) {
   let s = 0;
-  if (threatened.has(key(cell.x, cell.y))) s -= 25;
+  if (threatened.has(key(cell.x, cell.y))) s -= 45;
   const profile = unit.ai?.profile;
   if (profile === 'ranged' || profile === 'support' || profile === 'summoner') {
     const adj = adjacentEnemies(combat, unit, cell).length;
