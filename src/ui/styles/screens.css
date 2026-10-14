@@ -953,7 +953,7 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  animation: float 2.4s ease-in-out infinite;
+  animation: float 2.4s ease-in-out 3;
 }
 
 @keyframes float {

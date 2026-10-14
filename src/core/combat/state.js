@@ -93,7 +93,7 @@ export function addLog(combat, text, kind = 'info') {
 
 export function addFx(combat, fx) {
   combat.seq.fx += 1;
-  combat.fx.push({ id: combat.seq.fx, ...fx });
+  combat.fx.push({ id: combat.seq.fx, act: combat.actionSeq, ...fx });
   if (combat.fx.length > FX_LIMIT) combat.fx.splice(0, combat.fx.length - FX_LIMIT);
 }
 

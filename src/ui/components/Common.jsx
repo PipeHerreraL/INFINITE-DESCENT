@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import Icon from './Icon.jsx';
 
 /** Tooltip flotante que sigue al cursor. */
-export function Tip({ content, children, className = '', as: Tag = 'span', delay = 120, ...rest }) {
+export function Tip({ content, children, className = '', as: Tag = 'span', delay = 120, wide = false, ...rest }) {
   const [pos, setPos] = useState(null);
   const timer = useRef(null);
   if (!content) return <Tag className={className} {...rest}>{children}</Tag>;
@@ -22,12 +22,12 @@ export function Tip({ content, children, className = '', as: Tag = 'span', delay
   return (
     <Tag className={className} onMouseEnter={show} onMouseMove={move} onMouseLeave={hide} {...rest}>
       {children}
-      {pos ? <TipBox x={pos.x} y={pos.y}>{content}</TipBox> : null}
+      {pos ? <TipBox x={pos.x} y={pos.y} wide={wide}>{content}</TipBox> : null}
     </Tag>
   );
 }
 
-function TipBox({ x, y, children }) {
+function TipBox({ x, y, children, wide }) {
   const ref = useRef(null);
   const [style, setStyle] = useState({ left: x + 16, top: y + 16, opacity: 0 });
   useLayoutEffect(() => {
@@ -43,7 +43,7 @@ function TipBox({ x, y, children }) {
     setStyle({ left, top, opacity: 1 });
   }, [x, y]);
   return createPortal(
-    <div ref={ref} className="tipbox" style={style} role="tooltip">
+    <div ref={ref} className={`tipbox ${wide ? 'wide' : ''}`} style={style} role="tooltip">
       {children}
     </div>,
     document.body,

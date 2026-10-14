@@ -23,7 +23,12 @@ export default function RunScreen() {
   useEffect(() => {
     const onKey = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-      if (e.key === 'c' || e.key === 'C') setSheet((v) => !v);
+      if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+      if (e.key !== 'c' && e.key !== 'C') return;
+      // Solo se alterna la hoja si no hay otro diálogo abierto encima.
+      const modal = document.querySelector('[aria-modal="true"]');
+      if (modal && !modal.classList.contains('sheet-modal')) return;
+      setSheet((v) => !v);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);

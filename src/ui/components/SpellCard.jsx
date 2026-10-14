@@ -52,7 +52,7 @@ export function SpellIcon({ spell, caster, size = 40 }) {
   );
 }
 
-export function SpellCard({ spell, caster, combat = null, range = null, cooldown = 0, compact = false }) {
+export function SpellCard({ spell, caster, combat = null, range = null, cooldown = 0, compact = false, blocked = null }) {
   const meta = spellMeta(spell, range);
   const def = spell.isWeapon ? null : getSpellDef(spell.id);
   return (
@@ -61,7 +61,7 @@ export function SpellCard({ spell, caster, combat = null, range = null, cooldown
         <SpellIcon spell={spell} caster={caster} size={36} />
         <div className="grow">
           <div className="spell-name">{spell.name}</div>
-          <div className="tiny dim">{targetName(spell.target)}</div>
+          <div className="tiny muted">{targetName(spell.target)}</div>
         </div>
       </div>
       <div className="spell-meta">{meta.join(' · ')}</div>
@@ -75,6 +75,7 @@ export function SpellCard({ spell, caster, combat = null, range = null, cooldown
       {spell.variantId ? <div className="tiny variant-text">Variante: {spell.name} (base: {def?.name})</div> : null}
       {spell.runes?.length ? <div className="tiny rune-text">Runas: {spell.runes.map((r) => SPELL_RUNES[r]?.name).join(', ')}</div> : null}
       {cooldown > 0 ? <div className="tiny warn-text">Disponible en {cooldown} turno(s).</div> : null}
+      {blocked && !cooldown ? <div className="tiny warn-text">No disponible: {blocked}.</div> : null}
     </div>
   );
 }

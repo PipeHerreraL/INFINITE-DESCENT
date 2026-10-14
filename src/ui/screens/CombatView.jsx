@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGameState, useDispatch } from '../hooks/useGame.jsx';
+import { STEP_MS } from '../../core/game/store.js';
 import { STATUSES } from '../../content/statuses.js';
 import { STATS } from '../../content/stats.js';
 import { ELEMENTS } from '../../content/elements.js';
@@ -28,9 +29,19 @@ function quickCheck(combat, hero, spell) {
 }
 
 export default function CombatView({ onOpenSheet }) {
-  const { run } = useGameState();
+  const { run, meta } = useGameState();
   const dispatch = useDispatch();
   const combat = run.combat;
+  const stepMs = STEP_MS[meta.settings.aiSpeed] ?? 110;
+  const [notice, setNotice] = useState(null);
+  const flash = (text) => {
+    setNotice({ text, at: Date.now() });
+  };
+  useEffect(() => {
+    if (!notice) return undefined;
+    const t = setTimeout(() => setNotice(null), 1800);
+    return () => clearTimeout(t);
+  }, [notice]);
   const hero = combat.units[combat.heroId];
   const [spellId, setSpellId] = useState(null);
   const [hover, setHover] = useState(null);
@@ -55,15 +66,24 @@ export default function CombatView({ onOpenSheet }) {
   useEffect(() => {
     const onKey = (e) => {
       const s = stateRef.current;
-      if (e.target.tagName === 'INPUT') return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      // Con un diálogo abierto, los atajos de combate no actúan por detrás.
+      if (document.querySelector('[aria-modal="true"]')) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
       if (e.key === 'Escape') setSpellId(null);
-      else if (e.key === ' ' && s.isHeroTurn) {
+      else if ((e.key === ' ' || e.key === 'Enter') && s.combat.phase === 'placement') {
+        e.preventDefault();
+        dispatch({ type: 'COMBAT', action: { type: 'ready' } });
+      } else if (e.key === ' ' && s.isHeroTurn) {
         e.preventDefault();
         dispatch({ type: 'COMBAT', action: { type: 'endTurn' } });
         setSpellId(null);
       } else if (/^[1-9]$/.test(e.key) && s.isHeroTurn) {
         const sp = s.hero.spells[Number(e.key) - 1];
-        if (sp && !quickCheck(s.combat, s.hero, sp)) setSpellId((cur) => (cur === sp.id ? null : sp.id));
+        if (!sp) return;
+        const why = quickCheck(s.combat, s.hero, sp);
+        if (why) flash(`${sp.name}: ${why}`);
+        else setSpellId((cur) => (cur === sp.id ? null : sp.id));
       }
     };
     window.addEventListener('keydown', onKey);
@@ -162,13 +182,13 @@ export default function CombatView({ onOpenSheet }) {
             onCellContext={() => setSpellId(null)}
             previews={previews}
             inspectId={inspectId}
+            stepMs={stepMs}
           />
           {banner ? <div className={`combat-banner ${banner.warn ? 'warn' : ''}`} key={banner.id}>{banner.text}</div> : null}
-          {hint ? <div className="board-hint">{hint}</div> : null}
+          {notice ? <div className="board-hint notice" key={notice.at}>{notice.text}</div> : hint ? <div className="board-hint">{hint}</div> : null}
           {combat.phase === 'placement' ? (
-            <div className="placement-bar panel">
-              <span><b>Fase de colocación.</b> Elige una casilla azul. Observa a los enemigos y el desafío antes de empezar.</span>
-              <button type="button" className="btn btn-gold" onClick={() => dispatch({ type: 'COMBAT', action: { type: 'ready' } })}>¡Listo!</button>
+            <div className="placement-bar">
+              <b>Fase de colocación:</b> elige una casilla azul. Revisa a los enemigos y el desafío, y pulsa «¡Listo!» (o Espacio).
             </div>
           ) : null}
           {combat.phase === 'victory' || combat.phase === 'defeat' ? <EndOverlay combat={combat} /> : null}
@@ -200,11 +220,11 @@ export default function CombatView({ onOpenSheet }) {
             const why = quickCheck(combat, hero, s);
             const cd = hero.cooldowns[s.id] || 0;
             return (
-              <Tip key={s.id} content={<SpellCard spell={s} caster={hero} combat={combat} range={effectiveRange(hero, s)} cooldown={cd} />}>
+              <Tip key={s.id} content={<SpellCard spell={s} caster={hero} combat={combat} range={effectiveRange(hero, s)} cooldown={cd} blocked={combat.phase === 'active' && isHeroTurn ? why : null} />}>
                 <button
                   type="button"
                   className={`spell-btn ${spellId === s.id ? 'selected' : ''} ${why ? 'off' : ''}`}
-                  onClick={() => (why ? null : setSpellId(spellId === s.id ? null : s.id))}
+                  onClick={() => (why ? flash(`${s.name}: ${why}`) : setSpellId(spellId === s.id ? null : s.id))}
                   aria-label={`${s.name}${why ? ` (${why})` : ''}`}
                   aria-pressed={spellId === s.id}
                 >
@@ -220,6 +240,11 @@ export default function CombatView({ onOpenSheet }) {
         </div>
         <div className="turn-actions">
           <button type="button" className="btn btn-parchment btn-sm" onClick={onOpenSheet}><Icon name="bag" size={14} /> Equipo</button>
+          {combat.phase === 'placement' ? (
+            <button type="button" className="btn btn-gold end-turn" onClick={() => dispatch({ type: 'COMBAT', action: { type: 'ready' } })}>
+              ¡Listo! <span className="kbd">Espacio</span>
+            </button>
+          ) : null}
           {combat.phase === 'active' ? (
             isHeroTurn ? (
               <button type="button" className="btn btn-gold end-turn" onClick={() => { dispatch({ type: 'COMBAT', action: { type: 'endTurn' } }); setSpellId(null); }}>

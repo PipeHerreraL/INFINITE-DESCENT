@@ -21,7 +21,6 @@ const PALETTES = {
   web: { a: '#918eae', b: '#8582a3', stroke: '#65627f', block: '#5f5c7a', side: '#4a4761' },
 };
 
-const STEP_MS = 115;
 
 function Decor({ kind, pal }) {
   const block = (
@@ -101,20 +100,26 @@ function Decor({ kind, pal }) {
 
 /**
  * Posiciones mostradas de las unidades: animan el recorrido de los
- * movimientos paso a paso y suavizan empujes y desplazamientos.
+ * movimientos paso a paso y suavizan empujes y desplazamientos. Cada unidad
+ * tiene sus propios temporizadores: un cambio nuevo cancela la animación
+ * pendiente, de modo que el dibujo nunca se desincroniza del estado.
  */
-function useDisplayPositions(combat) {
+function useDisplayPositions(combat, stepMs) {
   const [, force] = useState(0);
   const posRef = useRef({});
   const modeRef = useRef({});
   const seenFx = useRef(0);
-  const timers = useRef([]);
+  const timers = useRef({});
 
   useEffect(() => {
     const units = combat.units;
     const newFx = combat.fx.filter((f) => f.id > seenFx.current);
     if (combat.fx.length) seenFx.current = Math.max(seenFx.current, combat.fx[combat.fx.length - 1].id);
     let changed = false;
+    const clearUnit = (id) => {
+      (timers.current[id] ?? []).forEach(clearTimeout);
+      timers.current[id] = [];
+    };
     for (const u of Object.values(units)) {
       const cur = posRef.current[u.id];
       if (!cur) {
@@ -123,25 +128,24 @@ function useDisplayPositions(combat) {
         changed = true;
         continue;
       }
-      if (cur.x === u.x && cur.y === u.y) continue;
       const fxForUnit = newFx.filter((f) => f.unitId === u.id && ['move', 'slide', 'teleport'].includes(f.type));
+      if (cur.x === u.x && cur.y === u.y && !fxForUnit.length) continue;
+      clearUnit(u.id);
       const move = fxForUnit.find((f) => f.type === 'move');
-      if (move && fxForUnit.length === 1) {
+      if (move && fxForUnit.length === 1 && move.path.length > 1) {
         const steps = move.path.slice(1);
         steps.forEach((c, i) => {
-          const t = setTimeout(() => {
+          timers.current[u.id].push(setTimeout(() => {
             posRef.current[u.id] = { x: c.x, y: c.y };
             modeRef.current[u.id] = 'step';
             force((n) => n + 1);
-          }, i * STEP_MS);
-          timers.current.push(t);
+          }, i * stepMs));
         });
-        // Garantiza la posición final aunque cambie algo durante la animación.
-        const tEnd = setTimeout(() => {
+        // Garantiza la posición final del estado al terminar la animación.
+        timers.current[u.id].push(setTimeout(() => {
           posRef.current[u.id] = { x: u.x, y: u.y };
           force((n) => n + 1);
-        }, steps.length * STEP_MS + 20);
-        timers.current.push(tEnd);
+        }, steps.length * stepMs + 20));
       } else {
         const tp = fxForUnit.length && fxForUnit.every((f) => f.type === 'teleport');
         modeRef.current[u.id] = tp ? 'instant' : 'slide';
@@ -150,9 +154,9 @@ function useDisplayPositions(combat) {
       }
     }
     if (changed) force((n) => n + 1);
-  }, [combat]);
+  }, [combat, stepMs]);
 
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  useEffect(() => () => Object.values(timers.current).flat().forEach(clearTimeout), []);
   return { pos: posRef.current, mode: modeRef.current };
 }
 
@@ -171,11 +175,24 @@ function useFloaters(combat) {
     if (!fresh.length) return;
     seen.current = fresh[fresh.length - 1].id;
     const now = Date.now();
-    const added = fresh
-      .filter((f) => ['damage', 'heal', 'shield', 'text', 'proc', 'cast', 'explosion', 'impact', 'death', 'summon'].includes(f.type))
-      .map((f, i) => ({ ...f, born: now, delay: i * 60 }));
-    if (!added.length) return;
-    setItems((prev) => [...prev.filter((p) => now - p.born < 1600), ...added]);
+    const STACKED = new Set(['damage', 'heal', 'shield', 'text', 'proc', 'cast']);
+    setItems((prev) => {
+      const alive = prev.filter((p) => now - p.born < 1600);
+      // Los textos de una misma unidad se apilan en filas para no solaparse.
+      const rows = {};
+      for (const p of alive) if (p.unitId && STACKED.has(p.type)) rows[p.unitId] = Math.max(rows[p.unitId] ?? 0, p.row + 1);
+      const added = fresh
+        .filter((f) => ['damage', 'heal', 'shield', 'text', 'proc', 'cast', 'explosion', 'impact', 'death', 'summon'].includes(f.type))
+        .map((f, i) => {
+          let row = 0;
+          if (f.unitId && STACKED.has(f.type)) {
+            row = (rows[f.unitId] ?? 0) % 4;
+            rows[f.unitId] = (rows[f.unitId] ?? 0) + 1;
+          }
+          return { ...f, born: now, delay: i * 60, row };
+        });
+      return added.length ? [...alive, ...added] : prev;
+    });
     const t = setTimeout(() => setItems((prev) => prev.filter((p) => Date.now() - p.born < 1600)), 1700);
     return () => clearTimeout(t);
   }, [combat.fx]);
@@ -191,10 +208,11 @@ export default function Board({
   onCellContext,
   previews = [],
   inspectId = null,
+  stepMs = 110,
 }) {
   const board = combat.board;
   const pal = PALETTES[board.style] ?? PALETTES.meadow;
-  const { pos, mode } = useDisplayPositions(combat);
+  const { pos, mode } = useDisplayPositions(combat, stepMs);
   const floaters = useFloaters(combat);
 
   const cells = useMemo(() => Object.entries(board.cells).map(([k, t]) => ({ k, t, ...parseKey(k) })), [board]);
@@ -240,6 +258,7 @@ export default function Board({
   return (
     <svg
       className="board-svg"
+      style={{ '--step-ms': `${stepMs}ms` }}
       viewBox={`${bounds.x} ${bounds.y} ${bounds.w} ${bounds.h}`}
       onMouseLeave={() => onHover?.(null)}
       onContextMenu={(e) => {
@@ -279,14 +298,6 @@ export default function Board({
               {h ? <polygon points={DIAMOND} className={`cell-hl ${h}`} /> : null}
               {hl.telegraph?.has(c.k) ? <polygon points={DIAMOND} fill="url(#tele-hatch)" className="cell-tele" /> : null}
               {hoverCell && hoverCell.x === c.x && hoverCell.y === c.y ? <polygon points={DIAMOND} className="cell-hover" /> : null}
-              {c.t === 'floor' ? (
-                <polygon
-                  points={DIAMOND}
-                  className="cell-hit"
-                  onMouseEnter={() => onHover?.({ x: c.x, y: c.y })}
-                  onClick={() => onCellClick?.({ x: c.x, y: c.y })}
-                />
-              ) : null}
             </g>
           );
         })}
@@ -322,10 +333,9 @@ export default function Board({
           return (
             <g
               key={u.id}
-              className={`unit ${u.side} ${active ? 'active' : ''} ${inspectId === u.id ? 'inspected' : ''} mode-${mode[u.id] ?? 'instant'}`}
+              className={`unit ${u.side} ${active ? 'active' : ''} ${inspectId === u.id ? 'inspected' : ''} ${hoverCell && hoverCell.x === u.x && hoverCell.y === u.y ? 'hovered' : ''} mode-${mode[u.id] ?? 'instant'}`}
               style={{ transform: `translate(${px}px, ${py}px)` }}
-              onMouseEnter={() => onHover?.({ x: u.x, y: u.y })}
-              onClick={() => onCellClick?.({ x: u.x, y: u.y })}
+              pointerEvents="none"
             >
               <ellipse cx="0" cy="2" rx="20" ry="9" className="unit-ring" />
               <ellipse cx="0" cy="2" rx="16" ry="6" fill="rgba(0,0,0,0.25)" />
@@ -359,6 +369,24 @@ export default function Board({
         })}
       </g>
 
+      {/* Capa de interacción: siempre por encima, para poder apuntar a cualquier casilla. */}
+      <g className="board-hit">
+        {cells.map((c) => {
+          if (c.t !== 'floor') return null;
+          const { px, py } = project(c.x, c.y);
+          return (
+            <polygon
+              key={c.k}
+              points={DIAMOND}
+              transform={`translate(${px} ${py})`}
+              className="cell-hit"
+              onMouseEnter={() => onHover?.({ x: c.x, y: c.y })}
+              onClick={() => onCellClick?.({ x: c.x, y: c.y })}
+            />
+          );
+        })}
+      </g>
+
       {/* Efectos */}
       <g className="board-fx" pointerEvents="none">
         {floaters.map((f) => {
@@ -367,23 +395,24 @@ export default function Board({
           if (at?.x === undefined) return null;
           const { px, py } = project(at.x, at.y);
           const style = { animationDelay: `${f.delay}ms` };
+          const lift = (f.row ?? 0) * 15;
           switch (f.type) {
             case 'damage':
               return (
-                <text key={f.id} x={px} y={py - 58} textAnchor="middle" className={`float dmg ${f.crit ? 'crit' : ''}`} style={{ ...style, fill: f.value === 0 ? '#ccc' : '#ff5a47', stroke: '#2a0a05' }}>
+                <text key={f.id} x={px} y={py - 58 - lift} textAnchor="middle" className={`float dmg ${f.crit ? 'crit' : ''}`} style={{ ...style, fill: f.value === 0 ? '#ccc' : '#ff5a47', stroke: '#2a0a05' }}>
                   {f.value === 0 ? '0' : `−${f.value}`}
                 </text>
               );
             case 'heal':
-              return <text key={f.id} x={px} y={py - 58} textAnchor="middle" className="float heal" style={style}>+{f.value}</text>;
+              return <text key={f.id} x={px} y={py - 58 - lift} textAnchor="middle" className="float heal" style={style}>+{f.value}</text>;
             case 'shield':
-              return <text key={f.id} x={px} y={py - 46} textAnchor="middle" className="float shield" style={style}>⛨ {f.value}</text>;
+              return <text key={f.id} x={px} y={py - 46 - lift} textAnchor="middle" className="float shield" style={style}>⛨ {f.value}</text>;
             case 'text':
-              return <text key={f.id} x={px} y={py - 40} textAnchor="middle" className="float txt" style={{ ...style, fill: f.color ?? '#fff' }}>{f.text}</text>;
+              return <text key={f.id} x={px} y={py - 40 - lift} textAnchor="middle" className="float txt" style={{ ...style, fill: f.color ?? '#fff' }}>{f.text}</text>;
             case 'proc':
-              return <text key={f.id} x={px} y={py - 74} textAnchor="middle" className="float proc" style={style}>✦ {f.text}</text>;
+              return <text key={f.id} x={px} y={py - 74 - lift} textAnchor="middle" className="float proc" style={style}>✦ {f.text}</text>;
             case 'cast':
-              return <text key={f.id} x={px} y={py - 86} textAnchor="middle" className={`float cast ${f.crit ? 'crit' : ''}`} style={style}>{f.text}{f.crit ? ' ¡crítico!' : ''}</text>;
+              return <text key={f.id} x={px} y={py - 86 - lift} textAnchor="middle" className={`float cast ${f.crit ? 'crit' : ''}`} style={style}>{f.text}{f.crit ? ' ¡crítico!' : ''}</text>;
             case 'impact':
               return <circle key={f.id} cx={px} cy={py} r="10" className="fx-impact" />;
             case 'summon':

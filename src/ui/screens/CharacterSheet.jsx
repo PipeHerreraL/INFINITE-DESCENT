@@ -156,10 +156,9 @@ export default function CharacterSheet({ onClose }) {
           <div className="sheet-block">
             <div className="panel-title">Pasiva y talentos</div>
             <div className="small"><b>{cls.passive.name}:</b> {cls.passive.desc}</div>
-            {hero.talents.map((t) => {
-              const def = cls.talents.find((x) => x.id === t);
-              return <div key={t} className="small"><b>{def.name}:</b> {def.desc}</div>;
-            })}
+            {hero.talents.map((t) => cls.talents.find((x) => x.id === t)).filter(Boolean).map((def) => (
+              <div key={def.id} className="small"><b>{def.name}:</b> {def.desc}</div>
+            ))}
             {hero.boons.map((b) => (
               <div key={b.id} className="tiny muted">Don: {b.name}</div>
             ))}

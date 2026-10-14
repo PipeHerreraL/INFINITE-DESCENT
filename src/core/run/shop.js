@@ -83,7 +83,8 @@ export function buyRune(run, shop) {
   assertRule(run.kamas >= cost, `No tienes suficientes kamas (${cost}).`);
   run.kamas -= cost;
   shop.runeUsed = true;
-  run.queue.unshift(choiceRoom(run, 'rune'));
+  // Es un servicio pagado: no se puede omitir la elección (no se pierden los kamas).
+  run.queue.unshift({ ...choiceRoom(run, 'rune'), allowSkip: false });
 }
 
 export function rerollShop(run, shop) {

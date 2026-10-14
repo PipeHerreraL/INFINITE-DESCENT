@@ -214,6 +214,8 @@ export function optionAvailability(run, option) {
     const w = run.hero.equipment.weapon;
     if (!w || w.upgrade >= MAX_UPGRADE) return { ok: false, reason: 'Tu arma no se puede mejorar.' };
   }
+  const onlyHeals = (option.effects ?? []).length > 0 && option.effects.every((e) => e.type === 'heal');
+  if (onlyHeals && run.hero.hp >= run.hero.maxHpCache) return { ok: false, reason: 'Ya tienes la vida al máximo.' };
   if (c.kamas && run.kamas < c.kamas) return { ok: false, reason: `Necesitas ${c.kamas} kamas.` };
   if (c.fragments && run.fragments < c.fragments) return { ok: false, reason: `Necesitas ${c.fragments} fragmentos.` };
   if (c.hpPct && run.hero.hp <= Math.round((run.hero.maxHpCache * c.hpPct) / 100)) return { ok: false, reason: 'No tienes vida suficiente.' };

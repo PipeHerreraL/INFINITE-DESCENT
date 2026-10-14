@@ -210,12 +210,11 @@
 }
 
 .unit {
-  cursor: pointer;
   transition: transform 0.18s ease-out;
 }
 
 .unit.mode-step {
-  transition: transform 0.11s linear;
+  transition: transform var(--step-ms, 110ms) linear;
 }
 
 .unit.mode-instant {
@@ -245,7 +244,7 @@
   stroke-dasharray: 4 3;
 }
 
-.unit:hover .unit-sprite {
+.unit.hovered .unit-sprite {
   filter: brightness(1.15) drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
 }
 
@@ -481,14 +480,22 @@
 
 .placement-bar {
   position: absolute;
-  bottom: 10px;
+  top: 6px;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  padding: 8px 14px;
+  padding: 6px 14px;
   max-width: calc(100% - 20px);
+  background: rgba(20, 14, 40, 0.88);
+  border: 2px solid rgba(74, 163, 255, 0.6);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+.board-hint.notice {
+  border-color: var(--danger);
+  color: #ffe1db;
 }
 
 .end-overlay {

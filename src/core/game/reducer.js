@@ -2,7 +2,7 @@ import { RuleError, assertRule } from '../errors.js';
 import { randomSeed } from '../rng.js';
 import { DIFFICULTIES } from '../../content/difficulty.js';
 import { createMeta, buyUnlock, recordRun } from '../meta/meta.js';
-import { createRun, refreshHero } from '../run/run.js';
+import { createRun, refreshHero, floorNumber } from '../run/run.js';
 import {
   enterNode, finishCombat, leaveRoom, chooseOption, skipChoice, chooseEventOption, chooseRest, openChest,
   victoryChoice, startRelicRoom,
@@ -70,7 +70,7 @@ const HANDLERS = {
     const run = requireRun(state);
     run.combat = null;
     run.room = null;
-    run.ended = { victory: false, reason: 'Expedición abandonada.', floor: run.stats.floorsCleared };
+    run.ended = { victory: false, reason: 'Expedición abandonada.', floor: floorNumber(run) };
   },
   CLOSE_RUN(state) {
     assertRule(state.run?.ended, 'La expedición sigue en curso.');

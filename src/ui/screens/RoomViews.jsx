@@ -202,7 +202,7 @@ export function ChoiceView() {
               {preview ? <div className="tiny muted">Pasa el ratón para ver el detalle.</div> : null}
             </button>
           );
-          return preview ? <Tip key={i} content={preview} as="div">{card}</Tip> : <div key={i}>{card}</div>;
+          return preview ? <Tip key={i} content={preview} as="div" wide>{card}</Tip> : <div key={i}>{card}</div>;
         })}
       </div>
     </RoomFrame>
