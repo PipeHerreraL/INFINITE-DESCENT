@@ -4,7 +4,7 @@ import { assertRule } from '../errors.js';
 import { generateItemChoices, itemValue } from '../items/items.js';
 import { removeItem } from '../items/equipment.js';
 import { buildHeroProfile } from '../hero/profile.js';
-import { pickRelics } from './rewards.js';
+import { pickRelics, ownedLegendaries } from './rewards.js';
 import { choiceRoom, runeOptions } from './choices.js';
 import { healPct, floorNumber, refreshHero, discover, addRelic } from './run.js';
 
@@ -25,7 +25,7 @@ export function price(run, base) {
 export function createShop(run) {
   const floor = floorNumber(run);
   const count = 4 + (run.unlocks?.merchant_eye ? 1 : 0);
-  const items = generateItemChoices(run.rng, run.pools.items, run.counters, count, { floor, classId: run.hero.classId }).map((item) => ({
+  const items = generateItemChoices(run.rng, run.pools.items, run.counters, count, { floor, classId: run.hero.classId, exclude: ownedLegendaries(run) }).map((item) => ({
     item,
     price: Math.round(itemValue(item) * 1.15),
     sold: false,

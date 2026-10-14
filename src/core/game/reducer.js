@@ -56,6 +56,7 @@ const HANDLERS = {
   },
   START_RUN(state, { classId, originId = null, seed = null, difficulty = 0 }) {
     assertRule(!state.run || state.run.ended, 'Ya hay una expedición en curso.');
+    assertRule(Number.isInteger(difficulty) && difficulty >= 0, 'Dificultad inválida.');
     assertRule(difficulty <= state.meta.maxDifficulty && difficulty < DIFFICULTIES.length, 'Esa dificultad aún no está desbloqueada.');
     const run = createRun({ classId, originId, seed: seed || randomSeed(), difficulty, unlocks: state.meta.unlocks });
     if (state.meta.unlocks.start_relic) {

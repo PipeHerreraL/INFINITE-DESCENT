@@ -61,6 +61,7 @@ export function createRun({ classId, originId = null, seed, difficulty = 0, unlo
       level: 1,
       xp: 0,
       hp: 1,
+      hpDebt: 0,
       maxHpCache: 0,
       spells,
       talents: [],
@@ -92,13 +93,40 @@ export function createRun({ classId, originId = null, seed, difficulty = 0, unlo
   return run;
 }
 
+/**
+ * Vida perdida real. `hpDebt` guarda la parte que no cabe cuando una bajada de
+ * vida máxima deja al héroe en 1 PV, para que quitarse y volver a ponerse
+ * equipo nunca cure.
+ */
+function missingHp(hero, max = hero.maxHpCache) {
+  return Math.max(0, max - hero.hp) + (hero.hpDebt || 0);
+}
+
+function applyMissing(hero, max, missing) {
+  const raw = max - Math.max(0, missing);
+  if (raw < 1) {
+    hero.hp = 1;
+    hero.hpDebt = 1 - raw;
+  } else {
+    hero.hp = Math.min(max, raw);
+    hero.hpDebt = 0;
+  }
+}
+
 /** Recalcula la vida máxima conservando el daño recibido. */
 export function refreshHero(run) {
   const profile = buildHeroProfile(run);
-  const delta = profile.maxHp - (run.hero.maxHpCache || profile.maxHp);
-  run.hero.hp = Math.max(1, Math.min(profile.maxHp, run.hero.hp + delta));
-  run.hero.maxHpCache = profile.maxHp;
+  const hero = run.hero;
+  const missing = missingHp(hero, hero.maxHpCache || profile.maxHp);
+  applyMissing(hero, profile.maxHp, missing);
+  hero.maxHpCache = profile.maxHp;
   return profile;
+}
+
+/** Fija la vida actual (p. ej., al salir de un combate). */
+export function setHeroHp(run, hp) {
+  run.hero.hp = Math.max(1, Math.min(run.hero.maxHpCache, Math.round(hp)));
+  run.hero.hpDebt = 0;
 }
 
 export function currentAct(run) {
@@ -116,10 +144,10 @@ export function floorNumber(run, node = currentNode(run)) {
 }
 
 export function healHero(run, amount) {
-  const max = run.hero.maxHpCache;
-  const before = run.hero.hp;
-  run.hero.hp = Math.min(max, Math.round(run.hero.hp + amount));
-  return run.hero.hp - before;
+  const hero = run.hero;
+  const before = hero.hp;
+  applyMissing(hero, hero.maxHpCache, missingHp(hero) - Math.round(amount));
+  return hero.hp - before;
 }
 
 export function healPct(run, pct) {

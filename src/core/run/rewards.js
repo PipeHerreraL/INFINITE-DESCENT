@@ -15,19 +15,27 @@ export function pickRelics(run, tiers, count) {
   return sample(run.rng, candidates, count);
 }
 
+/** Legendarios que el héroe ya posee: no vuelven a salir en el botín. */
+export function ownedLegendaries(run) {
+  return [...Object.values(run.hero.equipment), ...run.hero.bag]
+    .filter((i) => i && i.rarity === 'legendary')
+    .map((i) => i.baseId);
+}
+
 /** Opciones de objeto para una recompensa. */
 export function itemChoicesFor(run, { floor, count = 3, bonus = 0, min = 'common', rarity = null, forceLegendary = false }) {
   const opts = { floor, bonus, min, classId: run.hero.classId };
+  const owned = ownedLegendaries(run);
   const items = [];
   if (forceLegendary) {
-    const leg = generateItem(run.rng, run.pools.items, run.counters, { ...opts, rarity: 'legendary' });
+    const leg = generateItem(run.rng, run.pools.items, run.counters, { ...opts, rarity: 'legendary', exclude: owned });
     if (leg) items.push(leg);
   }
   items.push(
     ...generateItemChoices(run.rng, run.pools.items, run.counters, count - items.length, {
       ...opts,
       rarity: rarity ?? undefined,
-      exclude: items.map((i) => i.baseId),
+      exclude: [...owned, ...items.map((i) => i.baseId)],
     }),
   );
   return items;

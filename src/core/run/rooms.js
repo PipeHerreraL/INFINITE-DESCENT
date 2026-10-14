@@ -13,7 +13,7 @@ import { levelUpRoom, applyChoiceOption, variantOptions, newSpellOptions, runeOp
 import { createShop } from './shop.js';
 import { createForge } from './forge.js';
 import { applyRunEffects } from './runEffects.js';
-import { currentAct, currentNode, floorNumber, healPct, addKamas, discover, logRun, refreshHero } from './run.js';
+import { currentAct, currentNode, floorNumber, healPct, addKamas, discover, logRun, refreshHero, setHeroHp } from './run.js';
 
 export const POST_COMBAT_REGEN_PCT = 20;
 
@@ -60,7 +60,7 @@ export function startCombat(run, { type, modifier = null }) {
   const act = currentAct(run);
   const node = currentNode(run);
   const encounter = generateEncounter(run.rng, act, node?.row ?? 0, type);
-  encounter.modifiers = [modifier, run.nextCombatModifier].filter(Boolean);
+  encounter.modifiers = [...new Set([modifier, run.nextCombatModifier].filter(Boolean))];
   encounter.nodeType = type;
   run.nextCombatModifier = null;
   run.combatSeq += 1;
@@ -93,7 +93,7 @@ export function finishCombat(run) {
     logRun(run, 'Derrota.');
     return;
   }
-  run.hero.hp = Math.max(1, hero.hp);
+  setHeroHp(run, hero.hp);
   refreshHero(run);
   healPct(run, POST_COMBAT_REGEN_PCT * (run.rules?.regenMult ?? 1));
   run.stats.combatsWon += 1;
@@ -209,6 +209,7 @@ export function optionAvailability(run, option) {
   const c = option.cost ?? {};
   if (r.spellWithVariants && !variantOptions(run).length) return { ok: false, reason: 'Ningún hechizo puede transformarse.' };
   if (r.learnableSpells && !newSpellOptions(run).length) return { ok: false, reason: 'No quedan hechizos por aprender.' };
+  if (r.notHaveRelic && run.hero.relics.includes(r.notHaveRelic)) return { ok: false, reason: 'Ya cargas con esa maldición.' };
   if (r.equippedWeaponUpgradable) {
     const w = run.hero.equipment.weapon;
     if (!w || w.upgrade >= MAX_UPGRADE) return { ok: false, reason: 'Tu arma no se puede mejorar.' };

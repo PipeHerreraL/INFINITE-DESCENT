@@ -198,3 +198,67 @@ describe('expediciones nuevas', () => {
     expect(s.run).toBeNull();
   });
 });
+
+describe('regresiones de la revisión', () => {
+  it('quitarse y ponerse equipo no cura', async () => {
+    const { createItem } = await import('../src/core/items/items.js');
+    const { refreshHero } = await import('../src/core/run/run.js');
+    let state = started();
+    const run = structuredClone(state.run);
+    run.hero.equipment.ring1 = createItem(run.rng, 'anilloVital', 'rare', 8, run.counters);
+    run.hero.equipment.ring2 = createItem(run.rng, 'anilloBruma', 'rare', 8, run.counters);
+    refreshHero(run);
+    run.hero.hp = 5;
+    state = { ...state, run };
+    state = reduce(state, { type: 'UNEQUIP', slot: 'ring1' });
+    state = reduce(state, { type: 'UNEQUIP', slot: 'ring2' });
+    expect(state.run.hero.hp).toBe(1);
+    const [a, b] = state.run.hero.bag;
+    state = reduce(state, { type: 'EQUIP', uid: a.uid, slot: 'ring1' });
+    state = reduce(state, { type: 'EQUIP', uid: b.uid, slot: 'ring2' });
+    expect(state.run.hero.hp).toBe(5);
+  });
+
+  it('el mismo modificador no se aplica dos veces', async () => {
+    const { startCombat } = await import('../src/core/run/rooms.js');
+    const run = makeRun();
+    run.nodeId = run.map.startIds[0];
+    run.nextCombatModifier = 'escudosBruma';
+    startCombat(run, { type: 'elite', modifier: 'escudosBruma' });
+    expect(run.combat.modifiers).toEqual(['escudosBruma']);
+  });
+
+  it('la forja no conserva un elemento obsoleto tras transmutar', async () => {
+    const { createItem } = await import('../src/core/items/items.js');
+    const { shiftElement, transmuteLine, createForge, itemOffensiveElement } = await import('../src/core/run/forge.js');
+    const run = makeRun();
+    run.fragments = 1000;
+    run.kamas = 1000;
+    // Pieza sin líneas elementales base y con un afijo de Fuerza.
+    const it = createItem(run.rng, 'colganteRunico', 'uncommon', 1, run.counters);
+    it.lines = it.lines.filter((l) => l.base);
+    it.lines.push({ stat: 'strength', roll: 0.5, base: false });
+    run.hero.bag.push(it);
+    const forge = createForge();
+    shiftElement(run, forge, it.uid, 'fire');
+    expect(it.elementMap).toEqual({ from: 'earth', to: 'fire' });
+    const idx = it.lines.findIndex((l) => !l.base);
+    let guard = 0;
+    while (itemOffensiveElement(it) === 'earth' && guard++ < 100) transmuteLine(run, forge, it.uid, idx);
+    expect(itemOffensiveElement(it)).not.toBe('earth');
+    expect(it.elementMap).toBeNull();
+  });
+
+  it('dos Trofeos del Coloso no pueden llevarse a la vez', async () => {
+    const { createItem } = await import('../src/core/items/items.js');
+    const { canEquip } = await import('../src/core/items/equipment.js');
+    const run = makeRun();
+    run.hero.equipment.trophy1 = createItem(run.rng, 'trofeoColoso', 'legendary', 1, run.counters);
+    expect(canEquip(run.hero, createItem(run.rng, 'trofeoColoso', 'legendary', 1, run.counters), 'trophy2').ok).toBe(false);
+  });
+
+  it('rechaza dificultades no enteras o negativas', () => {
+    expect(reduce(createInitialState(), { type: 'START_RUN', classId: 'furiak', seed: 'D', difficulty: -1 }).error).toBeTruthy();
+    expect(reduce(createInitialState(), { type: 'START_RUN', classId: 'furiak', seed: 'D', difficulty: '0' }).error).toBeTruthy();
+  });
+});

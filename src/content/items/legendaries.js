@@ -88,7 +88,7 @@ export const LEGENDARY_ITEMS = {
     stats: { intelligence: [8, 12] }, fixedStats: { bombMax: 1, bombStartCharge: 1 },
   },
   trofeoColoso: {
-    id: 'trofeoColoso', name: 'Trofeo del Coloso', type: 'trophy', rarity: 'legendary',
+    id: 'trofeoColoso', name: 'Trofeo del Coloso', type: 'trophy', unique: true, rarity: 'legendary',
     desc: 'Inamovible.',
     stats: { vitality: [40, 50] }, fixedStats: { mp: -1, resEarth: 10, resFire: 10, resWater: 10, resAir: 10, resNeutral: 10, pushRes: 10 },
   },

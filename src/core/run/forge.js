@@ -56,6 +56,8 @@ export function transmuteLine(run, forge, uid, lineIndex) {
   assertRule(item.lines[lineIndex], 'Línea inválida.');
   pay(run, TRANSMUTE_COST);
   rerollLine(run.rng, item, lineIndex);
+  // Si la línea transmutada era la elemental, la transmutación de elemento ya no aplica.
+  if (item.elementMap && itemOffensiveElement(item) !== item.elementMap.from) item.elementMap = null;
   forge.actions += 1;
   refreshHero(run);
   return item;
@@ -76,7 +78,7 @@ export function shiftElement(run, forge, uid, toElement) {
   const from = itemOffensiveElement(item);
   assertRule(from, `${getItemDef(item.baseId).name} no tiene características elementales.`);
   assertRule(ELEMENTAL_IDS.includes(toElement), 'Elemento inválido.');
-  const current = item.elementMap?.to ?? from;
+  const current = item.elementMap && item.elementMap.from === from ? item.elementMap.to : from;
   assertRule(current !== toElement, 'La pieza ya es de ese elemento.');
   pay(run, ELEMENT_SHIFT_COST);
   item.elementMap = toElement === from ? null : { from, to: toElement };

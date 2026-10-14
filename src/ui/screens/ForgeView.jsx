@@ -33,7 +33,7 @@ export default function ForgeView() {
   ];
   const up = item ? upgradeCost(run, forge, item) : null;
   const offEl = item ? itemOffensiveElement(item) : null;
-  const currentEl = item?.elementMap?.to ?? offEl;
+  const currentEl = item?.elementMap && item.elementMap.from === offEl ? item.elementMap.to : offEl;
 
   return (
     <div className="room forge">

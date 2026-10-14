@@ -132,7 +132,7 @@ export const EVENTS = {
         effects: [{ type: 'itemChoice', count: 1, minRarity: 'uncommon' }],
       },
       {
-        label: 'Venderle tu suerte', desc: '+70 kamas y la maldición Cascabel de Pesadilla.',
+        label: 'Venderle tu suerte', desc: '+70 kamas y la maldición Cascabel de Pesadilla.', requires: { notHaveRelic: 'cascabelPesadilla' },
         effects: [{ type: 'kamas', amount: 70 }, { type: 'curse', relic: 'cascabelPesadilla' }], result: 'Te sientes algo más pesado… y más rico.',
       },
       { label: 'Ignorarlo', desc: '', effects: [], result: '"¡Tú te lo pierdes!"' },
