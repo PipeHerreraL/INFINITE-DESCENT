@@ -194,7 +194,7 @@ Los 17 puntos del alcance mínimo están implementados y conectados en la interf
 
 ### Validación
 
-- `npm test`: 83 pruebas. Cubren PA y PM, validaciones de hechizos, línea de
+- `npm test`: 93 pruebas. Cubren PA y PM, validaciones de hechizos, línea de
   visión, placaje, daño y resistencias, escudos, colisiones, estados, turnos,
   victoria y derrota, sinergias, prevención de bucles, bombas, recálculo de
   estadísticas, activación de sets, restricciones de equipo, recompensas aplicadas
@@ -207,9 +207,9 @@ Los 17 puntos del alcance mínimo están implementados y conectados en la interf
 
 | Clase | Gana al jefe del estrato I | Supera el estrato I | Victorias totales |
 |---|---|---|---|
-| Furiak | 20 % | 3/20 | 1/20 |
-| Ensalmador | 52 % | 11/20 | 3/20 |
-| Petardista | 25 % | 6/20 | 0/20 |
+| Furiak | 27 % | 4/20 | 2/20 |
+| Ensalmador | 54 % | 11/20 | 4/20 |
+| Petardista | 30 % | 6/20 | 1/20 |
 
 El jugador automático no aprovecha a propósito el pilar contra Bramador, se cura
 mal y elige dones al azar. Por eso estas cifras son una **cota inferior**: un
@@ -239,3 +239,7 @@ No se ha sustituido nada por funcionalidad falsa. Lo que falta, documentado:
   una capa de localización.
 - **IA:** evalúa la mejor acción inmediata sin anticipar turnos futuros. Los jefes
   usan telegrafía y fases, no planificación profunda.
+- **Semillas y desbloqueos:** la misma semilla reproduce la misma expedición solo con
+  los mismos desbloqueos. Algunos desbloqueos (reliquia de partida, Ojo del
+  Mercader, objetos añadidos al botín) consumen números aleatorios del mismo flujo.
+  Para compartir semillas entre jugadores habría que separar esos flujos.

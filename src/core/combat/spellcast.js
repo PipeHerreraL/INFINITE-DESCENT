@@ -19,7 +19,7 @@ export function effectiveRange(unit, spell) {
 }
 
 function summonsOf(combat, unit) {
-  return Object.values(combat.units).filter((u) => !u.dead && u.summonerId === unit.id && u.kind === 'summon').length;
+  return Object.values(combat.units).filter((u) => !u.dead && u.summonerId === unit.id && u.kind !== 'bomb').length;
 }
 
 const fail = (reason) => ({ ok: false, reason });
@@ -149,7 +149,7 @@ export function castSpell(combat, caster, spellId, cell) {
   }
   if (spell.cooldown > 0) caster.cooldowns[spell.id] = spell.cooldown;
 
-  const hasDamage = spell.effects.some((e) => e.type === 'damage');
+  const hasDamage = spell.effects.some((e) => e.type === 'damage' || e.type === 'detonate');
   const critable = hasDamage || spell.effects.some((e) => e.type === 'heal');
   const isCrit = critable && chance(combat.rng, Math.min(100, (spell.crit || 0) + (stats.crit || 0)));
   const element = spell.element === 'dominant' ? caster.dominantElement : spell.element;

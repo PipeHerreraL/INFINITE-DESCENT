@@ -166,3 +166,58 @@ describe('bombas del Petardista', () => {
     expect(() => castSpell(c, h, 'bomba', { x: 2, y: 0 })).toThrow(/Máximo de bombas/);
   });
 });
+
+describe('regresiones de la revisión de combate', () => {
+  it('la explosión del set Carmesí (4) usa la vida máxima del enemigo que muere', () => {
+    const run = makeRun('furiak');
+    equip(run, 'hat', 'yelmoColmillo', 'rare');
+    equip(run, 'cloak', 'capaCerdas', 'rare');
+    equip(run, 'amulet', 'amuletoBrasa', 'rare');
+    equip(run, 'boots', 'botasPezuna', 'rare');
+    const c = makeCombat({ run, enemies: [{ id: 'plumin', x: 3, y: 2 }, { id: 'golemAncestral', x: 4, y: 2 }] });
+    const [plumin, golem] = enemies(c);
+    applyStatus(c, plumin, 'quemadura', { value: 3, duration: 2, sourceId: c.heroId });
+    const before = golem.hp + golem.shields.reduce((a, s) => a + s.value, 0);
+    killUnit(c, plumin, hero(c), {});
+    const lost = before - (golem.hp + golem.shields.reduce((a, s) => a + s.value, 0));
+    // 30% de la vida máxima del Plumín (no la del Gólem), antes de resistencias.
+    expect(lost).toBeLessThanOrEqual(Math.ceil(plumin.maxHp * 0.3));
+    expect(lost).toBeGreaterThan(0);
+  });
+
+  it('un Bloblín se divide aunque muera en una cadena profunda', () => {
+    const c = makeCombat({ enemies: [{ id: 'bloblin', x: 5, y: 5 }] });
+    const b = enemies(c)[0];
+    killUnit(c, b, hero(c), { depth: 3 });
+    expect(enemies(c).filter((u) => u.defId === 'bloblinMini' && !u.dead)).toHaveLength(2);
+  });
+
+  it('Atraer nunca lleva al objetivo más allá del lanzador', async () => {
+    const { pullUnit } = await import('../src/core/combat/effects.js');
+    const c = makeCombat({ enemies: [{ id: 'larvazul', x: 4, y: 3 }] });
+    const e = enemies(c)[0];
+    pullUnit(c, e, hero(c), 5);
+    expect(Math.abs(e.x - 2) + Math.abs(e.y - 2)).toBe(1);
+  });
+
+  it('el tope de invocaciones de monstruos cuenta refuerzos de nivel normal', async () => {
+    const { canCast } = await import('../src/core/combat/spellcast.js');
+    const { spawnMonster } = await import('../src/core/combat/effects.js');
+    const c = makeCombat({ enemies: [{ id: 'brujoKobold', x: 7, y: 7 }] });
+    const brujo = enemies(c)[0];
+    for (const [x, y] of [[6, 7], [7, 6], [5, 7], [7, 5]]) spawnMonster(c, 'koboldChispero', { x, y }, brujo, { bindTo: brujo });
+    forceTurn(c, brujo.id);
+    const spell = brujo.spells.find((s) => s.id === 'invocarKobold');
+    expect(canCast(c, brujo, spell, { x: 8, y: 7 }).reason).toMatch(/Máximo de invocaciones/);
+  });
+
+  it('en el turno automático cada hechizo cuenta como una acción (Ira)', async () => {
+    const { combatAction } = await import('../src/core/combat/actions.js');
+    const c = makeCombat({ enemies: [{ id: 'golemAncestral', x: 3, y: 2 }] });
+    combatAction(c, { type: 'autoTurn' });
+    const h = hero(c);
+    const casts = c.log.filter((l) => l.text.startsWith('Furiak lanza')).length;
+    const ira = h.statuses.find((s) => s.statusId === 'ira')?.stacks ?? 0;
+    if (casts >= 2) expect(ira).toBeGreaterThanOrEqual(2);
+  });
+});

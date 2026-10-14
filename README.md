@@ -19,7 +19,7 @@ npm install
 npm run dev        # servidor de desarrollo en http://localhost:5173
 npm run build      # compilación de producción en dist/
 npm run preview    # sirve la compilación
-npm test           # 83 pruebas de reglas, contenido y simulaciones (Vitest)
+npm test           # 93 pruebas de reglas, contenido y simulaciones (Vitest)
 npm run sim -- 20  # simulador de equilibrio: 20 expediciones por clase
 ```
 

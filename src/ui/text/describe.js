@@ -21,6 +21,7 @@ function valueText(v) {
     rawHeal: 'de la cura',
     ownerMaxHp: 'de tu vida máx.',
     targetMaxHp: 'de la vida máx. del objetivo',
+    payloadTargetMaxHp: 'de la vida máx. del enemigo',
     ownerMissingHp: 'de tu vida perdida',
     apCost: 'del coste en PA',
     chainIndex: 'por eslabón de cadena',

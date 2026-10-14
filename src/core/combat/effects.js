@@ -140,16 +140,21 @@ function collide(combat, target, blocker, remaining, source, depth, cell) {
 /** Atrae a `target` hacia `toward` hasta `distance` casillas (sin daño de choque). */
 export function pullUnit(combat, target, toward, distance) {
   if (!target || target.dead || statusFlag(target, 'preventPush')) return 0;
-  const dir = direction(target, toward);
   const from = { x: target.x, y: target.y };
   let moved = 0;
   for (let i = 0; i < distance; i++) {
-    const nx = target.x + dir.x;
-    const ny = target.y + dir.y;
-    if (nx === toward.x && ny === toward.y) break;
-    if (!isFloor(combat.board, nx, ny) || unitAt(combat, nx, ny)) break;
-    target.x = nx;
-    target.y = ny;
+    if (dist(target, toward) <= 1) break;
+    const dir = direction(target, toward);
+    let next = { x: target.x + dir.x, y: target.y + dir.y };
+    // En diagonal exacta, el último paso se hace por un eje para quedar adyacente.
+    if (next.x === toward.x && next.y === toward.y) {
+      next = [{ x: target.x + dir.x, y: target.y }, { x: target.x, y: target.y + dir.y }]
+        .find((c) => isFloor(combat.board, c.x, c.y) && !unitAt(combat, c.x, c.y));
+      if (!next) break;
+    }
+    if (!isFloor(combat.board, next.x, next.y) || unitAt(combat, next.x, next.y)) break;
+    target.x = next.x;
+    target.y = next.y;
     moved++;
   }
   if (moved) addFx(combat, { type: 'slide', unitId: target.id, from, to: { x: target.x, y: target.y } });

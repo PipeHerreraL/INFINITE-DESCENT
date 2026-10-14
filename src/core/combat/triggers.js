@@ -16,6 +16,11 @@ import { executeEffects } from './effects.js';
 export const MAX_DEPTH = 3;
 export const TRIGGER_BUDGET = 250;
 
+// Eventos estructurales: ocurren una sola vez por unidad (no pueden formar
+// bucles), así que no se cortan por profundidad ni por presupuesto. Garantizan,
+// por ejemplo, que un Bloblín se divida aunque muera en mitad de una cadena.
+const STRUCTURAL_EVENTS = new Set(['death', 'combatJoin']);
+
 function collectTriggers(owner) {
   const out = [];
   for (const src of owner.sources ?? []) {
@@ -60,14 +65,15 @@ export function fireTriggers(combat, ownerId, event, payload = {}) {
   if (!owner) return;
   if (owner.dead && event !== 'death') return;
   const depth = payload.depth ?? 0;
-  if (depth > MAX_DEPTH) return;
+  const structural = STRUCTURAL_EVENTS.has(event);
+  if (depth > MAX_DEPTH && !structural) return;
   const entries = collectTriggers(owner)
     .filter((e) => e.trigger.event === event)
     .sort((a, b) => (b.trigger.priority ?? 0) - (a.trigger.priority ?? 0));
   for (const { trigger, source, key } of entries) {
-    if (combat.triggerBudget <= 0) return;
+    if (combat.triggerBudget <= 0 && !structural) return;
     if (owner.dead && event !== 'death') return;
-    if ((trigger.maxDepth ?? 1) < depth) continue;
+    if ((trigger.maxDepth ?? 1) < depth && !structural) continue;
     const ctx = { combat, owner, payload };
     if (!checkConditions(trigger.conditions, ctx)) continue;
     if (!limitsAllow(combat, owner, key, trigger.limit)) continue;

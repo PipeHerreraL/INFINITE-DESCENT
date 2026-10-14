@@ -6,7 +6,7 @@ import { adjacentEnemies } from '../combat/state.js';
  * - número: valor fijo
  * - [min, max]: aleatorio (o media en modo previsualización)
  * - { from, pct, mult, flat, multBy, max }: valor derivado del contexto
- *   from: amount | overheal | rawHeal | ownerMaxHp | targetMaxHp | ownerMissingHp | apCost | chainIndex
+ *   from: amount | overheal | rawHeal | ownerMaxHp | targetMaxHp | payloadTargetMaxHp | ownerMissingHp | apCost | chainIndex
  */
 export function resolveValue(v, ctx) {
   if (v === undefined || v === null) return 0;
@@ -31,7 +31,11 @@ export function resolveValue(v, ctx) {
       base = ctx.owner?.maxHp ?? 0;
       break;
     case 'targetMaxHp':
-      base = (ctx.target ?? ctx.payloadTarget)?.maxHp ?? 0;
+      base = ctx.target?.maxHp ?? 0;
+      break;
+    case 'payloadTargetMaxHp':
+      // Unidad objetivo del evento que activó el disparador (p. ej., el enemigo que murió).
+      base = (p.target && ctx.combat?.units[p.target]?.maxHp) ?? 0;
       break;
     case 'ownerMissingHp':
       base = ctx.owner ? ctx.owner.maxHp - ctx.owner.hp : 0;

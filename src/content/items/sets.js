@@ -44,7 +44,7 @@ export const SETS = {
         desc: 'Los enemigos que mueren mientras arden explotan: daño de Fuego del 30% de su vida máxima a su alrededor.',
         triggers: [{
           event: 'kill', conditions: [{ type: 'targetHasStatus', status: 'quemadura' }],
-          actions: [{ type: 'damage', target: 'areaAroundTarget', radius: 1, element: 'fire', fixed: true, value: { from: 'targetMaxHp', pct: 30 } }],
+          actions: [{ type: 'damage', target: 'areaAroundTarget', radius: 1, element: 'fire', fixed: true, value: { from: 'payloadTargetMaxHp', pct: 30 } }],
         }],
       },
     },

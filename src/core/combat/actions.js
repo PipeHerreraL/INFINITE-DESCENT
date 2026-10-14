@@ -71,6 +71,11 @@ export function combatAction(combat, action) {
       // Turno automático del héroe (simulaciones y pruebas).
       requireHeroTurn(combat);
       for (let i = 0; i < 20 && combat.phase === 'active' && combat.activeId === combat.heroId; i++) {
+        // Cada paso cuenta como una acción propia (límites perAction y presupuesto).
+        if (i > 0) {
+          combat.actionSeq += 1;
+          combat.triggerBudget = TRIGGER_BUDGET;
+        }
         runAiStep(combat, { controlHero: true });
       }
       checkEnd(combat);
