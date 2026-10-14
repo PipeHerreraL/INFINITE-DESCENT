@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="30%" cy="15%" r="95%">
+      <stop offset="0%" stop-color="#5a3d9a"/>
+      <stop offset="60%" stop-color="#261d47"/>
+      <stop offset="100%" stop-color="#17122b"/>
+    </radialGradient>
+    <linearGradient id="orb" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff3c4"/>
+      <stop offset="60%" stop-color="#f5c242"/>
+      <stop offset="100%" stop-color="#d4881c"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g transform="translate(256 300)">
+    <polygon points="0,-90 180,0 0,90 -180,0" fill="#557035"/>
+    <polygon points="-180,0 0,90 0,124 -180,34" fill="#456e17"/>
+    <polygon points="180,0 0,90 0,124 180,34" fill="#6d8f45"/>
+    <polygon points="0,-90 180,0 0,90 -180,0" fill="#a3d46e" stroke="#43280f" stroke-width="10" stroke-linejoin="round"/>
+    <polygon points="0,-45 90,0 0,45 -90,0" fill="#96ca61"/>
+    <circle cx="0" cy="-118" r="58" fill="url(#orb)" stroke="#43280f" stroke-width="10"/>
+    <circle cx="-18" cy="-138" r="14" fill="#fff8dc" opacity="0.8"/>
+  </g>
+</svg>
