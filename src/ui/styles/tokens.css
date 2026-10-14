@@ -1,0 +1,51 @@
+/* Identidad visual: fantasía colorida (tono Dofus) sobre un fondo onírico. */
+:root {
+  --font-display: 'Fredoka', 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+
+  --bg-deep: #17122b;
+  --bg-mid: #261d47;
+  --bg-glow: #47307a;
+
+  --parchment: #f7e9cb;
+  --parchment-2: #efdcb3;
+  --parchment-3: #e2c993;
+  --wood: #6b4423;
+  --wood-dark: #43280f;
+  --ink: #3a2816;
+  --ink-soft: #6d5639;
+
+  --leaf: #8bc34a;
+  --leaf-2: #6fa632;
+  --leaf-dark: #456e17;
+  --gold: #f5c242;
+  --gold-dark: #b8860b;
+  --sky: #4aa3ff;
+  --danger: #e5533d;
+  --danger-dark: #9e2a17;
+  --text-light: #fbf4e4;
+  --text-dim: #c9bfe4;
+
+  --ap: #3d8bfd;
+  --mp: #45b84a;
+  --hp: #e0453a;
+  --shield: #9ad1ff;
+
+  --el-earth: #b5793a;
+  --el-fire: #ef5b3a;
+  --el-water: #3d9be9;
+  --el-air: #4fbf62;
+  --el-neutral: #9aa0a6;
+
+  --r-common: #cfc6b0;
+  --r-uncommon: #7ad35f;
+  --r-rare: #4aa3ff;
+  --r-epic: #b56cff;
+  --r-legendary: #ff9f1c;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 6px 18px rgba(8, 4, 20, 0.45);
+  --shadow-sm: 0 2px 6px rgba(8, 4, 20, 0.35);
+  --gap: 12px;
+}
