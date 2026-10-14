@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGameState, useDispatch, useHeroProfile } from '../hooks/useGame.jsx';
 import { EQUIP_SLOTS, BAG_CAPACITY, getItemDef, slotsForType } from '../../content/items/index.js';
 import { CLASSES } from '../../content/classes/index.js';
@@ -12,6 +12,14 @@ import { ItemIcon, ItemCard } from '../components/ItemCard.jsx';
 import { SpellCard, SpellIcon, previewCaster } from '../components/SpellCard.jsx';
 import { StatList } from '../components/StatList.jsx';
 import Icon from '../components/Icon.jsx';
+import { useCompactUI } from '../hooks/useMedia.js';
+
+// Pestañas que solo se ven en pantallas pequeñas (en escritorio caben las tres columnas).
+const SHEET_TABS = [
+  ['equip', 'Equipo'],
+  ['build', 'Sets y reliquias'],
+  ['stats', 'Hechizos y stats'],
+];
 
 const DOLL_LAYOUT = [
   ['hat', 'amulet', 'cloak'],
@@ -25,6 +33,13 @@ export default function CharacterSheet({ onClose }) {
   const dispatch = useDispatch();
   const profile = useHeroProfile(run);
   const [selected, setSelected] = useState(null); // { where, slot?, uid }
+  const [tab, setTab] = useState('equip');
+  const compact = useCompactUI();
+  const detailRef = useRef(null);
+  // En móvil la ficha del objeto queda debajo de la bolsa: se lleva a la vista.
+  useEffect(() => {
+    if (compact && selected) detailRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [compact, selected]);
   const inCombat = !!run.combat;
   const inShop = run.room?.type === 'shop';
   const hero = run.hero;
@@ -94,8 +109,13 @@ export default function CharacterSheet({ onClose }) {
   return (
     <Modal title={`${cls.name} — Equipo y estadísticas`} onClose={onClose} wide className="sheet-modal">
       {inCombat ? <div className="sheet-note"><Icon name="info" size={14} /> Durante el combate el equipo no se puede cambiar.</div> : null}
-      <div className="sheet">
-        <div className="sheet-col">
+      <div className="sheet-tabs tabs" role="tablist">
+        {SHEET_TABS.map(([id, label]) => (
+          <button key={id} type="button" role="tab" aria-selected={tab === id} className={`tab ${tab === id ? 'active' : ''}`} onClick={() => setTab(id)}>{label}</button>
+        ))}
+      </div>
+      <div className={`sheet tab-${tab}`}>
+        <div className="sheet-col sheet-equip">
           <div className="panel-title">Equipado</div>
           <div className="doll">
             {DOLL_LAYOUT.flat().map((slot, i) => {
@@ -135,43 +155,47 @@ export default function CharacterSheet({ onClose }) {
           <div className="small muted">Kamas: {run.kamas} · Fragmentos: {run.fragments}</div>
         </div>
         <div className="sheet-col sheet-detail">
-          {selItem ? (
-            <ItemCard item={selItem} compare={compare} actions={actions} setCount={getItemDef(selItem.baseId).set ? counts[getItemDef(selItem.baseId).set] ?? 0 : null} />
-          ) : (
-            <div className="sheet-empty muted">Selecciona un objeto para ver sus detalles, compararlo y gestionarlo.</div>
-          )}
-          {profile.sets.length ? (
+          <div className="sheet-item" ref={detailRef}>
+            {selItem ? (
+              <ItemCard item={selItem} compare={compare} actions={actions} setCount={getItemDef(selItem.baseId).set ? counts[getItemDef(selItem.baseId).set] ?? 0 : null} />
+            ) : (
+              <div className="sheet-empty muted">Selecciona un objeto para ver sus detalles, compararlo y gestionarlo.</div>
+            )}
+          </div>
+          <div className="sheet-build">
+            {profile.sets.length ? (
+              <div className="sheet-block">
+                <div className="panel-title">Sets</div>
+                {profile.sets.map((s) => (
+                  <div key={s.id} className="set-status" style={{ '--sc': s.color }}>
+                    <b>{s.name}</b> <span className="tiny">({s.count}/{s.total})</span>
+                    {s.bonuses.map((b) => (
+                      <div key={b.pieces} className={`tiny ${b.active ? 'set-on' : 'set-off'}`}>{b.pieces}: {b.desc}</div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <div className="sheet-block">
-              <div className="panel-title">Sets</div>
-              {profile.sets.map((s) => (
-                <div key={s.id} className="set-status" style={{ '--sc': s.color }}>
-                  <b>{s.name}</b> <span className="tiny">({s.count}/{s.total})</span>
-                  {s.bonuses.map((b) => (
-                    <div key={b.pieces} className={`tiny ${b.active ? 'set-on' : 'set-off'}`}>{b.pieces}: {b.desc}</div>
-                  ))}
-                </div>
+              <div className="panel-title">Pasiva y talentos</div>
+              <div className="small"><b>{cls.passive.name}:</b> {cls.passive.desc}</div>
+              {hero.talents.map((t) => cls.talents.find((x) => x.id === t)).filter(Boolean).map((def) => (
+                <div key={def.id} className="small"><b>{def.name}:</b> {def.desc}</div>
+              ))}
+              {hero.boons.map((b) => (
+                <div key={b.id} className="tiny muted">Don: {b.name}</div>
               ))}
             </div>
-          ) : null}
-          <div className="sheet-block">
-            <div className="panel-title">Pasiva y talentos</div>
-            <div className="small"><b>{cls.passive.name}:</b> {cls.passive.desc}</div>
-            {hero.talents.map((t) => cls.talents.find((x) => x.id === t)).filter(Boolean).map((def) => (
-              <div key={def.id} className="small"><b>{def.name}:</b> {def.desc}</div>
-            ))}
-            {hero.boons.map((b) => (
-              <div key={b.id} className="tiny muted">Don: {b.name}</div>
-            ))}
-          </div>
-          <div className="sheet-block">
-            <div className="panel-title">Reliquias</div>
-            {hero.relics.length === 0 ? <div className="tiny muted">Ninguna todavía.</div> : null}
-            {hero.relics.map((id) => (
-              <div key={id} className="small relic-line"><Icon name={RELICS[id].icon} size={16} /> <b>{RELICS[id].name}:</b> {RELICS[id].desc}</div>
-            ))}
+            <div className="sheet-block">
+              <div className="panel-title">Reliquias</div>
+              {hero.relics.length === 0 ? <div className="tiny muted">Ninguna todavía.</div> : null}
+              {hero.relics.map((id) => (
+                <div key={id} className="small relic-line"><Icon name={RELICS[id].icon} size={16} /> <b>{RELICS[id].name}:</b> {RELICS[id].desc}</div>
+              ))}
+            </div>
           </div>
         </div>
-        <div className="sheet-col">
+        <div className="sheet-col sheet-stats">
           <div className="panel-title">Hechizos</div>
           <div className="sheet-spells">
             {profile.spells.map((s) => (

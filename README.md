@@ -10,6 +10,24 @@ combinan mediante un sistema de disparadores.
 > SVG geométrico original y todos los nombres de clases, monstruos y objetos son
 > propios. Cada clase indica en qué arquetipo de Dofus se inspira.
 
+## Jugar en línea
+
+La versión publicada está en **https://pipeherreral.github.io/INFINITE-DESCENT/**
+y se juega igual en el ordenador y en el móvil (en vertical o en horizontal). Desde
+el navegador del móvil se puede añadir a la pantalla de inicio como una app.
+
+### Publicación en GitHub Pages
+
+El workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) instala
+dependencias, pasa las pruebas y compila en cada push. Si el push es a la rama por
+defecto del repositorio (o se lanza a mano desde la pestaña *Actions*), publica
+`dist/` en GitHub Pages.
+
+Solo hay que activarlo una vez: en **Settings → Pages → Build and deployment**, elegir
+**Source: GitHub Actions**. Después cada push a la rama por defecto actualiza la web.
+La compilación usa rutas relativas (`base: './'`), así que funciona bajo
+`/<repositorio>/` sin configurar nada más.
+
 ## Cómo ejecutarlo
 
 Requisitos: Node.js 20 o superior.
@@ -19,7 +37,7 @@ npm install
 npm run dev        # servidor de desarrollo en http://localhost:5173
 npm run build      # compilación de producción en dist/
 npm run preview    # sirve la compilación
-npm test           # 93 pruebas de reglas, contenido y simulaciones (Vitest)
+npm test           # 99 pruebas de reglas, contenido, cámara y simulaciones (Vitest)
 npm run sim -- 20  # simulador de equilibrio: 20 expediciones por clase
 ```
 
@@ -49,12 +67,26 @@ La partida y la progresión permanente se guardan solas en `localStorage`.
 
 ## Controles
 
+### Ratón y teclado
+
 - **Clic** en una casilla verde para moverte.
 - **1-9** o clic en la barra para elegir un hechizo; luego, clic en una casilla azul.
 - **Esc** o clic derecho cancela el hechizo seleccionado.
 - **Espacio** termina el turno.
 - **C** abre la hoja de equipo y estadísticas.
 - Pasa el ratón sobre unidades, hechizos, objetos y nodos para ver todos los detalles.
+- **Rueda** para acercar o alejar el tablero; arrastra para moverlo.
+
+### Pantalla táctil
+
+- **Toca** una casilla para previsualizar el camino, el área o el daño, y **vuelve a
+  tocarla** para confirmar. Así no se mueve ni se lanza nada por un toque impreciso.
+- **Arrastra** el tablero para moverlo y **pellízcalo** para hacer zoom (también hay
+  botones +, − y ◎ para centrar en la unidad activa).
+- **Mantén pulsado** un hechizo, un objeto, una reliquia o un nodo del mapa para ver
+  su ficha; un toque corto sigue ejecutando la acción.
+- **Toca** a una unidad para ver su ficha. El registro, el equipo y el menú están en
+  la barra superior del combate.
 
 ## Arquitectura
 
@@ -73,8 +105,11 @@ src/
     sim/         jugador automático para simulaciones
   content/     Datos del juego: clases, hechizos, objetos, sets, reliquias,
                monstruos, jefes, estratos, eventos, desafíos, modificadores
-  ui/          React: pantallas, tablero SVG, componentes y estilos
+  ui/          React: pantallas, tablero SVG (con cámara: zoom y desplazamiento),
+               componentes, estilos (mobile.css para móvil y táctil)
 tests/         Vitest
+public/        Iconos y manifiesto web (instalable en el móvil)
+.github/       Workflow de compilación, pruebas y publicación en GitHub Pages
 scripts/       simulate.mjs
 docs/          DISENO.md (visión, decisiones y pendientes)
 ```

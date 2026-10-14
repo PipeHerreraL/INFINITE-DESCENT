@@ -194,12 +194,13 @@ Los 17 puntos del alcance mínimo están implementados y conectados en la interf
 
 ### Validación
 
-- `npm test`: 93 pruebas. Cubren PA y PM, validaciones de hechizos, línea de
+- `npm test`: 99 pruebas. Cubren PA y PM, validaciones de hechizos, línea de
   visión, placaje, daño y resistencias, escudos, colisiones, estados, turnos,
   victoria y derrota, sinergias, prevención de bucles, bombas, recálculo de
   estadísticas, activación de sets, restricciones de equipo, recompensas aplicadas
   una sola vez, compras sin fondos, forja, mapa reproducible, persistencia, reinicio
-  sin mejoras temporales y validación de todo el contenido.
+  sin mejoras temporales, validación de todo el contenido y la cámara del tablero
+  (zoom, desplazamiento y límites).
 - `npm run sim`: un jugador automático juega expediciones completas con las mismas
   reglas que la interfaz. Sirve para detectar bloqueos y medir el equilibrio.
 
@@ -232,9 +233,9 @@ No se ha sustituido nada por funcionalidad falsa. Lo que falta, documentado:
   curación se compra en el mercader.
 - **Audio:** sin música ni efectos de sonido.
 - **Arte:** formas SVG provisionales, pensadas para sustituirse por arte definitivo.
-- **Pantallas pequeñas:** el combate está pensado para escritorio (más de 1100 px).
-  En pantallas estrechas los paneles se apilan, pero no hay controles táctiles
-  específicos.
+- **Móvil:** la interfaz se adapta a móvil en vertical y en horizontal y a pantallas
+  táctiles (ver sección 9). No hay modo sin conexión (no se usa *service worker*):
+  la primera carga necesita red.
 - **Idioma:** los textos del contenido están en español y dentro de los datos; falta
   una capa de localización.
 - **IA:** evalúa la mejor acción inmediata sin anticipar turnos futuros. Los jefes
@@ -243,3 +244,40 @@ No se ha sustituido nada por funcionalidad falsa. Lo que falta, documentado:
   los mismos desbloqueos. Algunos desbloqueos (reliquia de partida, Ojo del
   Mercader, objetos añadidos al botín) consumen números aleatorios del mismo flujo.
   Para compartir semillas entre jugadores habría que separar esos flujos.
+
+## 9. Móvil y publicación
+
+- **Detección:** `src/ui/hooks/useMedia.js` define dos consultas. *Compacta*
+  (`max-width: 720px` o `max-height: 520px`) cambia la disposición. *Táctil*
+  (`hover: none` y `pointer: coarse`) cambia los textos de ayuda y oculta los atajos
+  de teclado. Los estilos están en `src/ui/styles/mobile.css`, con las mismas
+  consultas.
+- **Tablero:** la cámara (`src/ui/board/camera.js`, funciones puras con pruebas)
+  ajusta el `viewBox` del SVG a la proporción del contenedor. Admite zoom con
+  pellizco, rueda o botones y desplazamiento arrastrando. El zoom inicial hace que
+  una casilla mida al menos 44 px, y la cámara va hacia la unidad que empieza turno
+  si queda fuera de la vista.
+- **Confirmación en dos toques:** sin ratón no hay «pasar por encima». El primer
+  toque previsualiza (camino, área, daño) y el segundo, sobre la misma casilla,
+  ejecuta. Arrastrar o pellizcar nunca cuenta como toque. Los clics del ratón siguen
+  ejecutando a la primera.
+- **Información:** el componente `Tip` muestra con el ratón el tooltip de siempre.
+  En táctil, mantener pulsado abre una ficha inferior sin disparar la acción, y un
+  toque corto sobre algo que no es un botón también la abre.
+- **Disposición compacta:**
+  - En combate desaparece el HUD de la expedición: la barra superior lleva la línea
+    de turnos, el desafío, la ronda y los botones de registro, equipo y menú.
+  - La ficha de unidad se abre sobre el tablero al tocarla.
+  - En vertical, la barra inferior junta vida, PA/PM y fin de turno, y los hechizos
+    van en una fila desplazable. En horizontal, los controles pasan a una columna a
+    la derecha.
+  - La hoja de personaje usa pestañas y los diálogos se abren como hojas inferiores.
+  - La selección de clase deja fijo el botón «Descender».
+- **Avisos:** los errores de reglas salen arriba y no capturan toques, así que nunca
+  tapan los botones. Si la interfaz ya sabe que una casilla no es válida, el motivo
+  aparece en la pista del tablero, sin pasar por el aviso de error.
+- **Publicación:** `.github/workflows/deploy.yml` compila, prueba y publica en
+  GitHub Pages en cada push a la rama por defecto. `public/manifest.webmanifest` y
+  los iconos permiten instalar el juego en la pantalla de inicio. Las rutas son
+  relativas, así que funciona bajo `/<repositorio>/`.
+

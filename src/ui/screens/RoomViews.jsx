@@ -16,6 +16,7 @@ import { SpellCard, previewCaster } from '../components/SpellCard.jsx';
 import { Tip } from '../components/Common.jsx';
 import Icon from '../components/Icon.jsx';
 import { Portrait } from '../board/UnitSprite.jsx';
+import { useTouchUI } from '../hooks/useMedia.js';
 
 function RoomFrame({ title, subtitle, icon, children, footer }) {
   return (
@@ -181,6 +182,7 @@ export function ChoiceView() {
   const { run } = useGameState();
   const dispatch = useDispatch();
   const profile = useHeroProfile(run);
+  const touchUI = useTouchUI();
   const room = run.room;
   return (
     <RoomFrame
@@ -199,7 +201,7 @@ export function ChoiceView() {
               <h3>{o.name}</h3>
               <p className="small">{o.desc}</p>
               {o.kind === 'rune' ? <div className="tiny muted">{SPELL_RUNES[o.runeId].desc}</div> : null}
-              {preview ? <div className="tiny muted">Pasa el ratón para ver el detalle.</div> : null}
+              {preview ? <div className="tiny muted">{touchUI ? 'Mantén pulsado para ver el detalle.' : 'Pasa el ratón para ver el detalle.'}</div> : null}
             </button>
           );
           return preview ? <Tip key={i} content={preview} as="div" wide>{card}</Tip> : <div key={i}>{card}</div>;
@@ -315,7 +317,7 @@ export function VictoryView() {
   return (
     <RoomFrame title="¡Has despertado del sueño!" icon="star">
       <p className="event-text">La Tejedora de Pesadillas cae y el Abismo Onírico tiembla. Puedes despertar ahora y cobrar tu victoria… o seguir descendiendo hacia el Descenso Infinito, donde cada estrato es más duro que el anterior.</p>
-      <div className="row">
+      <div className="row wrap">
         <button type="button" className="btn btn-gold btn-lg" onClick={() => dispatch({ type: 'VICTORY_CHOICE', endless: false })}>Despertar (victoria)</button>
         <button type="button" className="btn btn-danger btn-lg" onClick={() => dispatch({ type: 'VICTORY_CHOICE', endless: true })}>Seguir descendiendo</button>
       </div>
@@ -363,7 +365,7 @@ export function RunEndView() {
           </div>
           <div className="tiny muted">Semilla: {run.seed}</div>
         </div>
-        <div className="row" style={{ justifyContent: 'center' }}>
+        <div className="row wrap" style={{ justifyContent: 'center' }}>
           <button type="button" className="btn btn-gold btn-lg" onClick={() => { dispatch({ type: 'CLOSE_RUN' }); dispatch({ type: 'NAVIGATE', screen: 'classSelect' }); }}>
             Nueva expedición
           </button>

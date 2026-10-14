@@ -80,7 +80,17 @@ export function HelpModal({ onClose }) {
             <li>Entrar junto a un enemigo detiene tu movimiento; salir puede costarte PM (<b>placaje</b> contra <b>huida</b>).</li>
             <li>Empujar a alguien contra un obstáculo o una unidad inflige <b>daño de empuje</b>.</li>
             <li>Las zonas rojas marcan ataques anunciados por los jefes: ¡sal de ellas!</li>
-            <li><span className="kbd">Espacio</span> termina el turno · <span className="kbd">Esc</span> cancela el hechizo.</li>
+            <li className="desktop-only"><span className="kbd">Espacio</span> termina el turno · <span className="kbd">Esc</span> cancela el hechizo · la rueda del ratón acerca o aleja el tablero.</li>
+          </ul>
+        </section>
+        <section>
+          <h3>En el móvil</h3>
+          <ul>
+            <li>Toca una casilla para <b>previsualizar</b> el camino o el área del hechizo, y vuelve a tocarla para <b>confirmar</b>.</li>
+            <li>Arrastra el tablero para moverlo y pellízcalo para acercarlo o alejarlo (o usa los botones + y −).</li>
+            <li><b>Mantén pulsado</b> un hechizo, un objeto, una reliquia o un nodo del mapa para ver su descripción.</li>
+            <li>Toca a una unidad para ver su ficha. El registro, el equipo y el menú están arriba a la derecha.</li>
+            <li>Puedes jugar en vertical o en horizontal, y añadir el juego a la pantalla de inicio desde el navegador.</li>
           </ul>
         </section>
         <section>

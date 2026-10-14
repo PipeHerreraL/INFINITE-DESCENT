@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGameState, useDispatch } from '../hooks/useGame.jsx';
 import { ELEMENTS, ELEMENTAL_IDS } from '../../content/elements.js';
 import { EQUIP_SLOTS } from '../../content/items/index.js';
@@ -8,6 +8,7 @@ import { locateItem } from '../../core/items/equipment.js';
 import { statLine } from '../text/describe.js';
 import { ItemCard, ItemIcon } from '../components/ItemCard.jsx';
 import Icon from '../components/Icon.jsx';
+import { useCompactUI } from '../hooks/useMedia.js';
 
 function costText(c) {
   if (!c) return '';
@@ -25,6 +26,12 @@ export default function ForgeView() {
   const forge = run.room;
   const hero = run.hero;
   const [uid, setUid] = useState(null);
+  const compact = useCompactUI();
+  const detailRef = useRef(null);
+  // En móvil las operaciones quedan debajo de la lista de piezas: se llevan a la vista.
+  useEffect(() => {
+    if (compact && uid) detailRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, [compact, uid]);
   const loc = uid ? locateItem(hero, uid) : null;
   const item = loc?.item ?? null;
   const all = [
@@ -58,7 +65,7 @@ export default function ForgeView() {
           </div>
           <p className="tiny dim">Mejorar: +12% a todas sus líneas por nivel (máx. +{MAX_UPGRADE}). Transmutar: vuelve a tirar una línea. Elemento: cambia sus características ofensivas a otro elemento para pivotar tu build.</p>
         </div>
-        <div className="forge-detail">
+        <div className="forge-detail" ref={detailRef}>
           {item ? (
             <>
               <ItemCard item={item} />

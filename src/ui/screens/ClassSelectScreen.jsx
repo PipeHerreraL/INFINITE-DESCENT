@@ -10,6 +10,7 @@ import { Portrait } from '../board/UnitSprite.jsx';
 import { SpellIcon, SpellCard, previewCaster } from '../components/SpellCard.jsx';
 import { Tip } from '../components/Common.jsx';
 import Icon from '../components/Icon.jsx';
+import { useTouchUI } from '../hooks/useMedia.js';
 
 export default function ClassSelectScreen() {
   const { meta } = useGameState();
@@ -18,6 +19,7 @@ export default function ClassSelectScreen() {
   const [originId, setOriginId] = useState(null);
   const [difficulty, setDifficulty] = useState(meta.maxDifficulty > 0 ? meta.maxDifficulty : 0);
   const [seed, setSeed] = useState('');
+  const touchUI = useTouchUI();
   const cls = CLASSES[classId];
   const origin = cls.origins.find((o) => o.id === originId) ?? cls.origins[0];
 
@@ -52,9 +54,9 @@ export default function ClassSelectScreen() {
               <div className="class-portrait"><Portrait sprite={{ shape: c.sprite, color: c.color }} size={110} /></div>
               <h2>{c.name}</h2>
               <div className="class-title">{c.title}</div>
-              <div className="tiny muted">Arquetipo: {c.archetype}</div>
-              <div className="class-tags">{c.playstyle.map((p) => <span key={p} className="chip">{p}</span>)}</div>
-              <div className="tiny muted">Expediciones: {st?.runs ?? 0} · Victorias: {st?.victories ?? 0}</div>
+              <div className="tiny muted class-extra">Arquetipo: {c.archetype}</div>
+              <div className="class-tags class-extra">{c.playstyle.map((p) => <span key={p} className="chip">{p}</span>)}</div>
+              <div className="tiny muted class-extra">Expediciones: {st?.runs ?? 0} · Victorias: {st?.victories ?? 0}</div>
             </button>
           );
         })}
@@ -62,6 +64,10 @@ export default function ClassSelectScreen() {
       <div className="class-detail panel">
         <div className="class-detail-main">
           <h2>{cls.name} <span className="muted small">— {cls.title}</span></h2>
+          <div className="class-tags class-tags-detail">
+            <span className="tiny muted">Arquetipo: {cls.archetype}</span>
+            {cls.playstyle.map((p) => <span key={p} className="chip">{p}</span>)}
+          </div>
           <p>{cls.desc}</p>
           <div className="class-stats">
             <span><Icon name="heart" color="var(--hp)" /> {preview.profile.maxHp} PV</span>
@@ -72,7 +78,7 @@ export default function ClassSelectScreen() {
           <div className="passive-box">
             <b>Pasiva — {cls.passive.name}:</b> {cls.passive.desc}
           </div>
-          <div className="small"><b>Hechizos iniciales</b> (pasa el ratón para ver detalles):</div>
+          <div className="small"><b>Hechizos iniciales</b> ({touchUI ? 'mantén pulsado uno para ver detalles' : 'pasa el ratón para ver detalles'}):</div>
           <div className="row wrap">
             {preview.run.hero.spells.map((s) => {
               const spell = resolveSpell(s.id);
@@ -123,6 +129,13 @@ export default function ClassSelectScreen() {
             Descender <Icon name="down" />
           </button>
         </div>
+      </div>
+      {/* En móvil, el botón de empezar queda siempre a mano. */}
+      <div className="classselect-foot">
+        <span className="small"><b style={{ color: cls.color }}>{cls.name}</b> · {origin.name}</span>
+        <button type="button" className="btn btn-gold" onClick={start}>
+          Descender <Icon name="down" />
+        </button>
       </div>
     </div>
   );

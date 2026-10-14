@@ -1,4 +1,6 @@
+import { useLayoutEffect, useRef } from 'react';
 import { useGameState, useDispatch } from '../hooks/useGame.jsx';
+import { useMediaQuery, useTouchUI } from '../hooks/useMedia.js';
 import { NODE_TYPES } from '../../content/acts.js';
 import { COMBAT_MODIFIERS } from '../../content/modifiers.js';
 import { availableNodes } from '../../core/run/mapgen.js';
@@ -6,30 +8,48 @@ import { currentAct } from '../../core/run/run.js';
 import { Tip } from '../components/Common.jsx';
 import Icon from '../components/Icon.jsx';
 
-const W = 760;
 const ROW_H = 78;
 
 export default function MapView() {
   const { run } = useGameState();
   const dispatch = useDispatch();
+  // En pantallas estrechas el mapa se dibuja más angosto: los nodos salen más grandes.
+  const narrow = useMediaQuery('(max-width: 640px)');
+  const touchUI = useTouchUI();
+  const W = narrow ? 420 : 760;
+  const margin = narrow ? 44 : 80;
+  const wrapRef = useRef(null);
   const map = run.map;
   const act = currentAct(run);
   const avail = new Set(availableNodes(map, run.nodeId));
   const nodes = Object.values(map.nodes);
   const H = map.rows * ROW_H + 40;
   const pos = (n) => ({
-    x: 80 + (n.col / Math.max(1, map.lanes - 1)) * (W - 160),
+    x: margin + (n.col / Math.max(1, map.lanes - 1)) * (W - 2 * margin),
     y: H - 40 - n.row * ROW_H,
   });
   const visited = new Set(run.visited);
+
+  // Si el mapa no cabe, se desplaza hasta los nodos a los que se puede viajar.
+  useLayoutEffect(() => {
+    const wrap = wrapRef.current;
+    const target = wrap?.querySelector('.map-node.avail') ?? wrap?.querySelector('.map-node.current');
+    if (!wrap || !target || wrap.scrollHeight <= wrap.clientHeight) return;
+    const r = target.getBoundingClientRect();
+    const wr = wrap.getBoundingClientRect();
+    wrap.scrollTop += r.top + r.height / 2 - (wr.top + wr.height / 2);
+  }, [run.nodeId, narrow]);
 
   return (
     <div className="map-view">
       <div className="map-head">
         <h2>{act.name}</h2>
-        <div className="dim small">{act.subtitle} · Elige tu camino. Pasa el ratón por un nodo para ver qué contiene.</div>
+        <div className="dim small">
+          {act.subtitle} · Elige tu camino.{' '}
+          {touchUI ? 'Toca un nodo brillante para viajar; mantén pulsado cualquiera para ver qué contiene.' : 'Pasa el ratón por un nodo para ver qué contiene.'}
+        </div>
       </div>
-      <div className="map-wrap scroll">
+      <div className="map-wrap scroll" ref={wrapRef}>
         <svg className="map-svg" viewBox={`0 0 ${W} ${H}`} style={{ maxWidth: W }} role="img" aria-label="Mapa del estrato">
           {nodes.flatMap((n) =>
             n.next.map((nid) => {
@@ -66,7 +86,7 @@ export default function MapView() {
                     <b>{t.name}</b> <span className="tiny">(fila {n.row + 1})</span>
                     <div className="small">{t.desc}</div>
                     {mod ? <div className="small warn-text"><b>{mod.name}:</b> {mod.desc}</div> : null}
-                    {isAvail ? <div className="tiny pos">Haz clic para viajar.</div> : null}
+                    {isAvail ? <div className="tiny pos">{touchUI ? 'Toca el nodo para viajar.' : 'Haz clic para viajar.'}</div> : null}
                   </div>
                 }
               >

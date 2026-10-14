@@ -8,6 +8,7 @@ import './ui/styles/base.css';
 import './ui/styles/screens.css';
 import './ui/styles/board.css';
 import './ui/styles/components.css';
+import './ui/styles/mobile.css';
 
 const store = createStore();
 // Acceso de depuración desde la consola del navegador.

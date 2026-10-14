@@ -1,0 +1,827 @@
+/*
+ * Adaptación a móviles y tabletas.
+ * - (hover: none): pantallas táctiles sin ratón.
+ * - (max-width: 720px), (max-height: 520px): móvil en vertical u horizontal
+ *   (la misma consulta que useCompactUI en src/ui/hooks/useMedia.js).
+ */
+
+/* ── Pantallas táctiles ─────────────────────────────── */
+@media (hover: none) {
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  input,
+  textarea,
+  select {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Sin teclado a la vista, los atajos solo estorban. */
+  .kbd,
+  .spell-key,
+  .desktop-only {
+    display: none;
+  }
+
+  /* En táctil el :hover se queda «pegado» tras un toque: sin saltos. */
+  .class-card:hover,
+  .choice-card:hover:not(:disabled),
+  button.item-icon:hover,
+  .spell-btn:hover:not(.off):not(.selected) {
+    transform: none;
+  }
+
+  .choice-card:hover:not(:disabled),
+  .event-option:hover:not(:disabled) {
+    box-shadow: var(--shadow), inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+  }
+
+  .btn:active:not(:disabled),
+  .choice-card:active:not(:disabled),
+  .event-option:active:not(:disabled) {
+    filter: brightness(0.94);
+  }
+
+  .board-zoom button,
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* ── Pantallas pequeñas ─────────────────────────────── */
+@media (max-width: 720px), (max-height: 520px) {
+  :root {
+    --gap: 10px;
+  }
+
+  .btn-lg {
+    padding: 10px 20px;
+    font-size: 1.05rem;
+  }
+
+  /* Cabeceras de pantalla: volver · título · extra */
+  .screen-head {
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+    padding: 10px 12px 6px;
+  }
+
+  .screen-head h1 {
+    font-size: 1.3rem;
+    text-align: center;
+    line-height: 1.15;
+  }
+
+  .screen-head .btn-ghost {
+    padding: 6px 10px;
+  }
+
+  .essence-badge {
+    font-size: 0.95rem;
+    padding: 2px 10px;
+  }
+
+  .codex .screen-head .tabs {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .tab {
+    white-space: nowrap;
+    padding: 5px 10px;
+    font-size: 0.88rem;
+  }
+
+  .sanctuary-body,
+  .codex-body {
+    padding: 0 12px 20px;
+  }
+
+  .codex-set {
+    grid-column: 1 / -1;
+  }
+
+  .codex-grid.monsters {
+    grid-template-columns: 1fr;
+  }
+
+  .records-stats,
+  .records-history {
+    padding: 10px;
+  }
+
+  /* Título */
+  .title-screen {
+    gap: 18px;
+    padding: 16px 16px 20px;
+  }
+
+  .title-diamond svg {
+    width: 64px;
+    height: 64px;
+  }
+
+  .title-sub {
+    font-size: 1.05rem;
+  }
+
+  .title-tag {
+    font-size: 0.92rem;
+  }
+
+  .title-menu {
+    gap: 10px;
+    width: min(360px, 100%);
+  }
+
+  /* Selección de clase: tarjetas compactas y botón de empezar fijo abajo */
+  .classselect {
+    padding-bottom: 0;
+  }
+
+  .class-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding: 6px 12px;
+  }
+
+  .class-card {
+    padding: 8px 4px;
+    gap: 2px;
+  }
+
+  .class-card h2 {
+    font-size: 1.05rem;
+  }
+
+  .class-card .class-title {
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  .class-portrait svg {
+    width: 64px;
+    height: 64px;
+  }
+
+  .class-extra {
+    display: none;
+  }
+
+  .class-tags-detail {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .class-detail {
+    width: calc(100% - 24px);
+    padding: 12px;
+    gap: 14px;
+    margin-top: 6px;
+  }
+
+  .class-detail-main h2 {
+    font-size: 1.3rem;
+  }
+
+  .class-detail .start-btn {
+    display: none;
+  }
+
+  .classselect-foot {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, rgba(67, 40, 15, 0.97), rgba(43, 25, 10, 0.98));
+    border-top: 3px solid var(--wood);
+    color: var(--parchment);
+  }
+
+  .input,
+  .select {
+    font-size: 16px; /* evita el zoom automático de iOS al enfocar */
+  }
+
+  /* HUD de la expedición en dos filas */
+  .hud {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'hero hero actions'
+      'cur relics floor';
+    gap: 4px 10px;
+    padding: 4px 10px 6px;
+    border-bottom-width: 2px;
+  }
+
+  .hud-hero {
+    grid-area: hero;
+    min-width: 0;
+  }
+
+  .hud-hero > svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hud-hero-info {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+    max-width: 320px;
+  }
+
+  .hud-currencies {
+    grid-area: cur;
+    gap: 10px;
+  }
+
+  .currency {
+    font-size: 0.95rem;
+  }
+
+  .hud-relics {
+    grid-area: relics;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    min-width: 0;
+    scrollbar-width: none;
+  }
+
+  .hud-relics .relic-badge {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .hud-relics .relic-badge svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .hud-floor {
+    grid-area: floor;
+    align-self: center;
+  }
+
+  .hud-act {
+    display: none;
+  }
+
+  .hud-actions {
+    grid-area: actions;
+    align-self: center;
+  }
+
+  .hud-btn-label {
+    display: none;
+  }
+
+  /* Mapa */
+  .map-view {
+    padding: 6px 8px 8px;
+    gap: 4px;
+  }
+
+  .map-head h2 {
+    font-size: 1.25rem;
+  }
+
+  /* El mapa conserva su tamaño y se desplaza, en vez de encogerse para caber. */
+  .map-svg {
+    max-height: none;
+    align-self: flex-start;
+    flex-shrink: 0;
+  }
+
+  .map-legend {
+    gap: 4px 8px;
+    font-size: 0.72rem;
+  }
+
+  .legend-dot {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* Salas */
+  .room {
+    padding: 8px 12px;
+  }
+
+  .room-head {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .room-head h2 {
+    font-size: 1.3rem;
+  }
+
+  .room-head .grow {
+    flex: 1 1 200px;
+  }
+
+  .room-head > .btn {
+    flex: 1 1 auto;
+  }
+
+  .room-body {
+    padding-right: 0;
+  }
+
+  .room-foot {
+    gap: 8px;
+    padding-top: 8px;
+  }
+
+  .room-foot .btn {
+    flex: 1 1 auto;
+  }
+
+  .reward-items,
+  .relic-choices,
+  .shop-row,
+  .choice-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
+    gap: 10px;
+  }
+
+  .choice-card {
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .event-text {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .chest-scene {
+    padding: 12px;
+  }
+
+  .forge-layout {
+    display: block;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .forge-items,
+  .forge-detail {
+    overflow: visible;
+  }
+
+  .forge-detail {
+    margin-top: 12px;
+    scroll-margin-top: 8px;
+  }
+
+  .forge-op .btn {
+    flex-shrink: 0;
+  }
+
+  .run-end {
+    padding: 12px;
+  }
+
+  .run-end-card {
+    padding: 16px;
+  }
+
+  .run-end-card h1 {
+    font-size: 1.6rem;
+  }
+
+  /* Diálogos: hoja inferior; los anchos ocupan toda la pantalla */
+  .modal-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    width: 100%;
+    max-height: 94dvh;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+    padding-bottom: env(safe-area-inset-bottom);
+    animation: sheet-up 0.18s ease-out;
+  }
+
+  .modal-wide {
+    height: 100%;
+    max-height: 100dvh;
+    border-radius: 0;
+    border: none;
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .modal-head {
+    padding: 8px 12px;
+  }
+
+  .modal-head h2 {
+    font-size: 1.15rem;
+  }
+
+  .modal-body {
+    padding: 10px 12px 14px;
+  }
+
+  .help-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hoja de personaje con pestañas */
+  .sheet-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-bottom: 10px;
+  }
+
+  .sheet {
+    grid-template-columns: 1fr;
+  }
+
+  .sheet.tab-equip .sheet-build,
+  .sheet.tab-equip .sheet-stats,
+  .sheet.tab-build .sheet-equip,
+  .sheet.tab-build .sheet-item,
+  .sheet.tab-build .sheet-stats,
+  .sheet.tab-stats .sheet-equip,
+  .sheet.tab-stats .sheet-detail {
+    display: none;
+  }
+
+  .sheet-build .sheet-block:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .bag {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .toast {
+    top: calc(8px + env(safe-area-inset-top));
+    border-radius: 14px;
+    font-size: 0.88rem;
+    padding: 6px 14px;
+  }
+
+  .log-modal .log {
+    font-size: 0.85rem;
+  }
+
+  /* ── Combate (vertical) ── */
+  .combat-view.compact {
+    padding: 4px 6px 6px;
+    gap: 4px;
+  }
+
+  .combat-view.compact .combat-top {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .combat-view.compact .timeline {
+    flex: 1;
+    min-width: 0;
+    scrollbar-width: none;
+  }
+
+  .combat-view.compact .tl-unit svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .combat-view.compact .tl-hp {
+    width: 28px;
+  }
+
+  .combat-view.compact .combat-top-right {
+    flex-wrap: nowrap;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .combat-view.compact .challenge-badge,
+  .combat-view.compact .mod-badge,
+  .combat-view.compact .round-badge {
+    font-size: 0.72rem;
+    padding: 3px 7px;
+    border-width: 1px;
+  }
+
+  .combat-view.compact .challenge-badge {
+    max-width: 96px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: inline-block;
+  }
+
+  .combat-view.compact .challenge-badge svg {
+    vertical-align: -3px;
+  }
+
+  .combat-view.compact .combat-center {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .combat-view.compact .board-wrap {
+    min-width: 0;
+    border-radius: 12px;
+  }
+
+  .combat-view.compact .combat-bottom {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'status actions'
+      'strip strip'
+      'spells spells';
+    gap: 6px 8px;
+    padding: 6px 8px;
+    border-width: 2px;
+    border-radius: 14px;
+  }
+
+  .combat-view.compact .hero-status {
+    grid-area: status;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .combat-view.compact .hero-hp {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .combat-view.compact .apmp {
+    gap: 4px;
+  }
+
+  .combat-view.compact .orb {
+    padding: 1px 8px;
+  }
+
+  .combat-view.compact .orb b {
+    font-size: 1.15rem;
+  }
+
+  .combat-view.compact .spell-strip {
+    grid-area: strip;
+  }
+
+  .combat-view.compact .spellbar {
+    grid-area: spells;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 9px 4px 2px;
+    scrollbar-width: none;
+  }
+
+  /* Centrado que no corta los extremos cuando la barra se desplaza. */
+  .combat-view.compact .spellbar > :first-child {
+    margin-left: auto;
+  }
+
+  .combat-view.compact .spellbar > :last-child {
+    margin-right: auto;
+  }
+
+  .combat-view.compact .spellbar > * {
+    flex-shrink: 0;
+  }
+
+  .combat-view.compact .turn-actions {
+    grid-area: actions;
+    flex-direction: row;
+  }
+
+  .combat-view.compact .end-turn {
+    min-width: 0;
+    padding: 8px 12px;
+  }
+
+  .combat-view.compact .waiting {
+    min-width: 0;
+    max-width: 128px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    justify-content: flex-end;
+  }
+
+  .board-hint {
+    white-space: normal;
+    width: max-content;
+    max-width: calc(100% - 16px);
+    text-align: center;
+    font-size: 0.8rem;
+  }
+
+  .placement-bar {
+    max-width: calc(100% - 110px);
+    font-size: 0.8rem;
+    border-radius: 12px;
+    padding: 4px 10px;
+  }
+
+  .combat-banner {
+    font-size: 1.3rem;
+    white-space: normal;
+    width: max-content;
+    max-width: 90%;
+    text-align: center;
+  }
+
+  .end-overlay {
+    padding: 10px;
+  }
+
+  .end-card {
+    padding: 16px 18px;
+  }
+
+  .end-card h1 {
+    font-size: 1.8rem;
+  }
+}
+
+/* Mapa angosto en móvil vertical (coincide con MapView). */
+@media (max-width: 640px) {
+  .map-svg {
+    max-width: 100% !important;
+  }
+}
+
+/* ── Móvil en horizontal ────────────────────────────── */
+@media (max-height: 520px) and (orientation: landscape) {
+  .hud {
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas: 'hero cur relics floor actions';
+    padding: 3px 10px;
+  }
+
+  .hud-hero-info {
+    width: 200px;
+  }
+
+  .title-logo h1 {
+    font-size: 2.4rem;
+  }
+
+  .title-tag {
+    display: none;
+  }
+
+  .map-legend {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    width: 100%;
+    scrollbar-width: none;
+  }
+
+  .map-legend .legend-item {
+    flex-shrink: 0;
+  }
+
+  .map-head .dim {
+    display: none;
+  }
+
+  .class-card {
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
+    text-align: left;
+    padding: 6px 8px;
+  }
+
+  .class-portrait svg {
+    width: 46px;
+    height: 46px;
+  }
+
+  /* Hoja de equipo: muñeco y ficha del objeto lado a lado */
+  .sheet.tab-equip {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+
+  .bag {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sheet.tab-stats .sheet-stats {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: start;
+  }
+
+  .sheet.tab-stats .sheet-stats > .panel-title {
+    grid-row: 1;
+  }
+
+  /* Forja: lista y operaciones en dos columnas con su propio desplazamiento */
+  .forge-layout {
+    display: grid;
+    grid-template-columns: minmax(200px, 34%) minmax(0, 1fr);
+    gap: 12px;
+    overflow: hidden;
+  }
+
+  .forge-items,
+  .forge-detail {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin-top: 0;
+  }
+
+  .modal {
+    max-height: 100dvh;
+  }
+
+  /* Combate: tablero a la izquierda y controles en una columna a la derecha */
+  .combat-view.compact {
+    grid-template-columns: minmax(0, 1fr) clamp(200px, 30%, 280px);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      'top side'
+      'board side';
+  }
+
+  .combat-view.compact .combat-top {
+    grid-area: top;
+  }
+
+  .combat-view.compact .combat-center {
+    grid-area: board;
+  }
+
+  .combat-view.compact .combat-bottom {
+    grid-area: side;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'status'
+      'actions'
+      'strip'
+      'spells';
+    align-content: start;
+    overflow-y: auto;
+  }
+
+  .combat-view.compact .hero-status {
+    flex-wrap: wrap;
+  }
+
+  .combat-view.compact .hero-hp {
+    flex-basis: 100%;
+  }
+
+  .combat-view.compact .apmp {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .combat-view.compact .turn-actions .end-turn,
+  .combat-view.compact .waiting {
+    flex: 1;
+    max-width: none;
+    justify-content: center;
+  }
+
+  .combat-view.compact .spellbar {
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .combat-view.compact .spellbar > :first-child,
+  .combat-view.compact .spellbar > :last-child {
+    margin: 0;
+  }
+}

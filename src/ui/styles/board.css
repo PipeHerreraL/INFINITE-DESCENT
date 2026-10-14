@@ -3,7 +3,8 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 6px;
   padding: 6px 10px 8px;
 }
@@ -126,11 +127,116 @@
   background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.06), transparent 70%);
 }
 
-.board-svg {
+.board-stage {
+  position: relative;
   width: 100%;
   height: 100%;
-  max-height: 100%;
+}
+
+.board-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
   user-select: none;
+  -webkit-user-select: none;
+  /* Los gestos del tablero (arrastrar, pellizcar) los gestiona el juego. */
+  touch-action: none;
+}
+
+.board-zoom {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 2;
+}
+
+.board-zoom button,
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--text-light);
+  background: rgba(20, 14, 40, 0.78);
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.board-zoom button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.board-zoom button:focus-visible,
+.icon-btn:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.unit-overlay {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: min(310px, calc(100% - 58px));
+  max-height: calc(100% - 60px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 3;
+  border-radius: var(--radius);
+  animation: fadein 0.15s ease-out;
+}
+
+.unit-overlay .unit-panel {
+  max-height: none;
+  padding-right: 34px;
+}
+
+.unit-overlay-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.spell-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: var(--parchment);
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  padding: 3px 8px;
+}
+
+.spell-strip-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  color: var(--gold);
+  font-weight: 700;
 }
 
 .cell-hit {
@@ -650,6 +756,20 @@
 
 .log-line {
   color: var(--text-dim);
+}
+
+/* Registro en diálogo (pantallas pequeñas): fondo oscuro para sus colores. */
+.log-modal {
+  background: linear-gradient(180deg, #241a40, #17122b);
+  border-color: rgba(201, 191, 228, 0.35);
+}
+
+.log-modal .modal-head {
+  border-bottom-color: rgba(201, 191, 228, 0.2);
+}
+
+.log-modal .modal-head h2 {
+  color: var(--gold);
 }
 
 .log-line.hit,

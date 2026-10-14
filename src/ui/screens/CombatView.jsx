@@ -16,9 +16,14 @@ import { bombsOf } from '../../core/combat/bombs.js';
 import { describeTrigger } from '../text/describe.js';
 import Board from '../board/Board.jsx';
 import { Portrait } from '../board/UnitSprite.jsx';
-import { Bar, Tip } from '../components/Common.jsx';
+import { Bar, Tip, Modal } from '../components/Common.jsx';
+import { useCompactUI, useTouchUI } from '../hooks/useMedia.js';
 import { SpellCard, SpellIcon } from '../components/SpellCard.jsx';
 import Icon from '../components/Icon.jsx';
+
+function rangeText(r) {
+  return r.min === r.max ? `alcance ${r.max}` : `alcance ${r.min}–${r.max}`;
+}
 
 function quickCheck(combat, hero, spell) {
   if (combat.phase !== 'active' || combat.activeId !== hero.id) return 'No es tu turno';
@@ -28,9 +33,11 @@ function quickCheck(combat, hero, spell) {
   return null;
 }
 
-export default function CombatView({ onOpenSheet }) {
+export default function CombatView({ onOpenSheet, onOpenMenu }) {
   const { run, meta } = useGameState();
   const dispatch = useDispatch();
+  const compact = useCompactUI();
+  const touchUI = useTouchUI();
   const combat = run.combat;
   const stepMs = STEP_MS[meta.settings.aiSpeed] ?? 110;
   const [notice, setNotice] = useState(null);
@@ -47,6 +54,7 @@ export default function CombatView({ onOpenSheet }) {
   const [hover, setHover] = useState(null);
   const [inspectId, setInspectId] = useState(null);
   const [showLog, setShowLog] = useState(true);
+  const [logOpen, setLogOpen] = useState(false);
   const isHeroTurn = combat.phase === 'active' && combat.activeId === hero.id;
   const spell = spellId ? hero.spells.find((s) => s.id === spellId) : null;
 
@@ -54,6 +62,14 @@ export default function CombatView({ onOpenSheet }) {
   useEffect(() => {
     if (spell && quickCheck(combat, hero, spell)) setSpellId(null);
   }, [combat, hero, spell]);
+
+  // Una previsualización táctil no sobrevive a un cambio de hechizo ni de turno:
+  // el siguiente toque debe volver a previsualizar antes de confirmar. (Con el
+  // ratón, la casilla bajo el cursor sigue siendo la previsualización.)
+  const touchInput = useRef(false);
+  useEffect(() => {
+    if (touchInput.current) setHover(null);
+  }, [spellId, combat.activeId]);
 
   const cast = (sid, cell) => {
     dispatch({ type: 'COMBAT', action: { type: 'cast', spellId: sid, x: cell.x, y: cell.y } });
@@ -119,7 +135,7 @@ export default function CombatView({ onOpenSheet }) {
       const p = pathFromReach(moveInfo.reach, hover);
       if (p && p.length) {
         highlights.path = p;
-        hint = `Mover: ${p.length} PM${moveInfo.loss ? ` (+${moveInfo.loss} PM perdidos por placaje)` : ''}`;
+        hint = `Mover: ${p.length} PM${moveInfo.loss ? ` (+${moveInfo.loss} PM perdidos por placaje)` : ''}${touchUI ? ' · toca otra vez para ir' : ''}`;
       }
     }
     if (moveInfo.loss > 0 && !hint) hint = `¡Placado! Salir de aquí cuesta ${moveInfo.loss} PM.`;
@@ -132,26 +148,55 @@ export default function CombatView({ onOpenSheet }) {
         const pv = previewSpell(combat, hero, spell, hover);
         for (const c of pv.cells) highlights.classes[key(c.x, c.y)] = 'area';
         previews = pv.results;
+        if (touchUI) hint = `${spell.name}: toca otra vez para lanzar`;
       } else if (rc) hint = rc.reason;
       else hint = 'Fuera de alcance.';
     }
   }
 
-  const onCellClick = (c) => {
+  // Con el ratón, pasar por encima previsualiza y el clic ejecuta. Con el dedo
+  // no hay «encima»: el primer toque previsualiza y el segundo confirma.
+  const onCellClick = (c, pointerType) => {
+    const k = key(c.x, c.y);
+    const touched = pointerType === 'touch';
+    touchInput.current = touched;
+    const again = hover && hover.x === c.x && hover.y === c.y;
     if (combat.phase === 'placement') {
       if (combat.board.playerStarts.some((s) => s.x === c.x && s.y === c.y)) dispatch({ type: 'COMBAT', action: { type: 'place', x: c.x, y: c.y } });
       return;
     }
     const u = unitAt(combat, c.x, c.y);
     if (spell && isHeroTurn) {
+      const rc = rangeMap?.get(k);
+      if (touched && !(again && rc?.valid)) {
+        setHover(c);
+        return;
+      }
+      // Si ya se sabe que no es válido, el motivo sale en la pista del tablero
+      // (sin pasar por las reglas ni mostrar el aviso de error).
+      if (!rc?.valid) {
+        flash(rc?.reason ?? 'Fuera de alcance.');
+        return;
+      }
       cast(spell.id, c);
+      if (touched) setHover(null);
       return;
     }
     if (u) {
       setInspectId(u.id === inspectId ? null : u.id);
+      if (touched) setHover(null);
       return;
     }
-    if (isHeroTurn && moveInfo?.reach.has(key(c.x, c.y))) dispatch({ type: 'COMBAT', action: { type: 'move', x: c.x, y: c.y } });
+    if (isHeroTurn && moveInfo?.reach.has(k)) {
+      if (touched && !again) {
+        setHover(c);
+        return;
+      }
+      dispatch({ type: 'COMBAT', action: { type: 'move', x: c.x, y: c.y } });
+      if (touched) setHover(null);
+      return;
+    }
+    if (touched) setHover(again ? null : c);
   };
 
   const hoverUnit = hover ? unitAt(combat, hover.x, hover.y) : null;
@@ -159,16 +204,34 @@ export default function CombatView({ onOpenSheet }) {
 
   const banner = useBanner(combat);
 
+  const selectSpell = (s) => {
+    const why = quickCheck(combat, hero, s);
+    if (why) flash(`${s.name}: ${why}`);
+    else setSpellId(spellId === s.id ? null : s.id);
+  };
+  const endTurn = () => {
+    dispatch({ type: 'COMBAT', action: { type: 'endTurn' } });
+    setSpellId(null);
+  };
+  const inspected = inspectId ? combat.units[inspectId] : null;
+
   return (
-    <div className="combat-view">
+    <div className={`combat-view ${compact ? 'compact' : ''}`}>
       <div className="combat-top">
-        <Timeline combat={combat} onInspect={setInspectId} />
+        <Timeline combat={combat} onInspect={(id) => setInspectId(compact && id === inspectId ? null : id)} />
         <div className="combat-top-right">
-          {combat.challenge ? <ChallengeBadge challenge={combat.challenge} /> : null}
+          {combat.challenge ? <ChallengeBadge challenge={combat.challenge} compact={compact} /> : null}
           {combat.modifiers.map((m) => (
-            <Tip key={m} content={COMBAT_MODIFIERS[m].desc} className="mod-badge"><Icon name="star" size={14} /> {COMBAT_MODIFIERS[m].name}</Tip>
+            <Tip key={m} content={COMBAT_MODIFIERS[m].desc} className="mod-badge"><Icon name="star" size={14} />{compact ? null : ` ${COMBAT_MODIFIERS[m].name}`}</Tip>
           ))}
-          <div className="round-badge">Ronda {Math.max(1, combat.round)}</div>
+          <div className="round-badge" title="Ronda">{compact ? 'R' : 'Ronda '}{Math.max(1, combat.round)}</div>
+          {compact ? (
+            <>
+              <button type="button" className="icon-btn" onClick={() => setLogOpen(true)} aria-label="Registro de combate"><Icon name="book" size={18} /></button>
+              <button type="button" className="icon-btn" onClick={onOpenSheet} aria-label="Equipo y estadísticas"><Icon name="bag" size={18} /></button>
+              {onOpenMenu ? <button type="button" className="icon-btn" onClick={onOpenMenu} aria-label="Menú"><Icon name="gear" size={18} /></button> : null}
+            </>
+          ) : null}
         </div>
       </div>
 
@@ -189,20 +252,32 @@ export default function CombatView({ onOpenSheet }) {
           {notice ? <div className="board-hint notice" key={notice.at}>{notice.text}</div> : hint ? <div className="board-hint">{hint}</div> : null}
           {combat.phase === 'placement' ? (
             <div className="placement-bar">
-              <b>Fase de colocación:</b> elige una casilla azul. Revisa a los enemigos y el desafío, y pulsa «¡Listo!» (o Espacio).
+              {touchUI ? (
+                <><b>Colocación:</b> toca una casilla azul y pulsa «¡Listo!».</>
+              ) : (
+                <><b>Fase de colocación:</b> elige una casilla azul. Revisa a los enemigos y el desafío, y pulsa «¡Listo!» (o Espacio).</>
+              )}
+            </div>
+          ) : null}
+          {compact && inspected && !inspected.dead ? (
+            <div className="unit-overlay">
+              <button type="button" className="unit-overlay-close" onClick={() => setInspectId(null)} aria-label="Cerrar ficha">×</button>
+              <UnitPanel unit={inspected} combat={combat} />
             </div>
           ) : null}
           {combat.phase === 'victory' || combat.phase === 'defeat' ? <EndOverlay combat={combat} /> : null}
         </div>
-        <aside className="combat-side">
-          <UnitPanel unit={shownUnit} combat={combat} />
-          <div className="log-panel panel-dark">
-            <button type="button" className="log-head" onClick={() => setShowLog((v) => !v)}>
-              Registro {showLog ? '▾' : '▸'}
-            </button>
-            {showLog ? <CombatLog log={combat.log} /> : null}
-          </div>
-        </aside>
+        {!compact ? (
+          <aside className="combat-side">
+            <UnitPanel unit={shownUnit} combat={combat} />
+            <div className="log-panel panel-dark">
+              <button type="button" className="log-head" onClick={() => setShowLog((v) => !v)}>
+                Registro {showLog ? '▾' : '▸'}
+              </button>
+              {showLog ? <CombatLog log={combat.log} /> : null}
+            </div>
+          </aside>
+        ) : null}
       </div>
 
       <div className="combat-bottom">
@@ -216,6 +291,12 @@ export default function CombatView({ onOpenSheet }) {
             <Tip content="Puntos de Movimiento: cada casilla cuesta 1 PM." className="orb mp"><b>{hero.mp}</b><span>PM</span></Tip>
           </div>
         </div>
+        {compact && spell ? (
+          <Tip content={<SpellCard spell={spell} caster={hero} combat={combat} range={effectiveRange(hero, spell)} />} className="spell-strip">
+            <b>{spell.name}</b> · {spell.apCost} PA · {rangeText(effectiveRange(hero, spell))}
+            <span className="spell-strip-more"><Icon name="info" size={14} /> detalles</span>
+          </Tip>
+        ) : null}
         <div className="spellbar">
           {hero.spells.map((s, i) => {
             const why = quickCheck(combat, hero, s);
@@ -225,11 +306,11 @@ export default function CombatView({ onOpenSheet }) {
                 <button
                   type="button"
                   className={`spell-btn ${spellId === s.id ? 'selected' : ''} ${why ? 'off' : ''}`}
-                  onClick={() => (why ? flash(`${s.name}: ${why}`) : setSpellId(spellId === s.id ? null : s.id))}
+                  onClick={() => selectSpell(s)}
                   aria-label={`${s.name}${why ? ` (${why})` : ''}`}
                   aria-pressed={spellId === s.id}
                 >
-                  <SpellIcon spell={s} caster={hero} size={48} />
+                  <SpellIcon spell={s} caster={hero} size={compact ? 44 : 48} />
                   <span className="spell-cost">{s.apCost}</span>
                   <span className="spell-key">{i + 1}</span>
                   {cd > 0 ? <span className="spell-cd">{cd}</span> : null}
@@ -240,7 +321,7 @@ export default function CombatView({ onOpenSheet }) {
           })}
         </div>
         <div className="turn-actions">
-          <button type="button" className="btn btn-parchment btn-sm" onClick={onOpenSheet}><Icon name="bag" size={14} /> Equipo</button>
+          {!compact ? <button type="button" className="btn btn-parchment btn-sm" onClick={onOpenSheet}><Icon name="bag" size={14} /> Equipo</button> : null}
           {combat.phase === 'placement' ? (
             <button type="button" className="btn btn-gold end-turn" onClick={() => dispatch({ type: 'COMBAT', action: { type: 'ready' } })}>
               ¡Listo! <span className="kbd">Espacio</span>
@@ -248,15 +329,20 @@ export default function CombatView({ onOpenSheet }) {
           ) : null}
           {combat.phase === 'active' ? (
             isHeroTurn ? (
-              <button type="button" className="btn btn-gold end-turn" onClick={() => { dispatch({ type: 'COMBAT', action: { type: 'endTurn' } }); setSpellId(null); }}>
-                Terminar turno <span className="kbd">Espacio</span>
+              <button type="button" className="btn btn-gold end-turn" onClick={endTurn}>
+                {compact ? 'Fin de turno' : 'Terminar turno'} <span className="kbd">Espacio</span>
               </button>
             ) : (
-              <div className="waiting"><Icon name="hourglass" size={16} /> Turno de {combat.units[combat.activeId]?.name}…</div>
+              <div className="waiting"><Icon name="hourglass" size={16} /> {compact ? combat.units[combat.activeId]?.name : `Turno de ${combat.units[combat.activeId]?.name}…`}</div>
             )
           ) : null}
         </div>
       </div>
+      {logOpen ? (
+        <Modal title="Registro de combate" onClose={() => setLogOpen(false)} className="log-modal">
+          <CombatLog log={combat.log} />
+        </Modal>
+      ) : null}
     </div>
   );
 }
@@ -298,11 +384,11 @@ function Timeline({ combat, onInspect }) {
   );
 }
 
-function ChallengeBadge({ challenge }) {
+function ChallengeBadge({ challenge, compact = false }) {
   const label = { active: 'En curso', failed: 'Fallido', completed: 'Completado' }[challenge.status];
   return (
-    <Tip content={<div><b>Desafío: {challenge.name}</b><div className="small">{challenge.desc}</div><div className="tiny">Recompensa: kamas, XP y esencia extra.</div></div>} className={`challenge-badge ${challenge.status}`}>
-      <Icon name="challenge" size={16} /> {challenge.name} · {label}
+    <Tip content={<div><b>Desafío: {challenge.name}</b> ({label})<div className="small">{challenge.desc}</div><div className="tiny">Recompensa: kamas, XP y esencia extra.</div></div>} className={`challenge-badge ${challenge.status}`}>
+      <Icon name="challenge" size={16} /> {challenge.name}{compact ? null : ` · ${label}`}
     </Tip>
   );
 }

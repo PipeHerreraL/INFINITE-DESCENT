@@ -13,12 +13,14 @@ import { RewardView, ChoiceView, EventView, RestView, ChestView, ActCompleteView
 import ShopView from './ShopView.jsx';
 import ForgeView from './ForgeView.jsx';
 import { HelpModal } from './TitleScreen.jsx';
+import { useCompactUI } from '../hooks/useMedia.js';
 
 export default function RunScreen() {
   const { run, meta } = useGameState();
   const profile = useHeroProfile(run);
   const [sheet, setSheet] = useState(false);
   const [menu, setMenu] = useState(false);
+  const compact = useCompactUI();
 
   useEffect(() => {
     const onKey = (e) => {
@@ -37,7 +39,7 @@ export default function RunScreen() {
   if (!run) return null;
   let content;
   if (run.ended) content = <RunEndView />;
-  else if (run.combat) content = <CombatView onOpenSheet={() => setSheet(true)} />;
+  else if (run.combat) content = <CombatView onOpenSheet={() => setSheet(true)} onOpenMenu={() => setMenu(true)} />;
   else if (run.room) {
     switch (run.room.type) {
       case 'reward':
@@ -74,7 +76,8 @@ export default function RunScreen() {
 
   return (
     <div className="run-screen">
-      {!run.ended ? <RunHud run={run} profile={profile} onSheet={() => setSheet(true)} onMenu={() => setMenu(true)} /> : null}
+      {/* En pantallas pequeñas el combate usa su propia barra superior. */}
+      {!run.ended && !(compact && run.combat) ? <RunHud run={run} profile={profile} onSheet={() => setSheet(true)} onMenu={() => setMenu(true)} /> : null}
       <main className="run-main">{content}</main>
       {sheet && !run.ended ? <CharacterSheet onClose={() => setSheet(false)} /> : null}
       {menu ? <RunMenu meta={meta} onClose={() => setMenu(false)} /> : null}
@@ -116,8 +119,8 @@ function RunHud({ run, profile, onSheet, onMenu }) {
         <div className="tiny dim">{act.subtitle} · Piso {floorNumber(run)}</div>
       </div>
       <div className="hud-actions">
-        <button type="button" className="btn btn-parchment btn-sm" onClick={onSheet}>
-          <Icon name="bag" size={16} /> Equipo <span className="kbd">C</span>
+        <button type="button" className="btn btn-parchment btn-sm" onClick={onSheet} aria-label="Equipo">
+          <Icon name="bag" size={16} /> <span className="hud-btn-label">Equipo</span> <span className="kbd">C</span>
         </button>
         <button type="button" className="btn btn-ghost btn-sm" onClick={onMenu} aria-label="Menú">
           <Icon name="gear" size={16} />
@@ -136,7 +139,7 @@ function RunMenu({ meta, onClose }) {
       <div className="col">
         <div>
           <div className="panel-title">Velocidad de la IA</div>
-          <div className="row">
+          <div className="row wrap">
             {[['slow', 'Lenta'], ['normal', 'Normal'], ['fast', 'Rápida']].map(([v, l]) => (
               <button type="button" key={v} className={`btn btn-sm ${meta.settings.aiSpeed === v ? 'btn-gold' : 'btn-parchment'}`} onClick={() => dispatch({ type: 'SET_SETTING', key: 'aiSpeed', value: v })}>{l}</button>
             ))}
@@ -147,7 +150,7 @@ function RunMenu({ meta, onClose }) {
           Volver al título (se guarda la partida)
         </button>
         {confirm ? (
-          <div className="row">
+          <div className="row wrap">
             <span className="small">¿Seguro? Se cuenta como derrota.</span>
             <button type="button" className="btn btn-danger btn-sm" onClick={() => { dispatch({ type: 'ABANDON_RUN' }); onClose(); }}>Abandonar</button>
             <button type="button" className="btn btn-parchment btn-sm" onClick={() => setConfirm(false)}>No</button>
