@@ -6,7 +6,7 @@ import { reduce, createInitialState } from '../game/reducer.js';
 import { availableNodes } from '../run/mapgen.js';
 import { buildHeroProfile } from '../hero/profile.js';
 import { itemStats, itemTriggers } from '../items/items.js';
-import { defaultSlotFor, canEquip } from '../items/equipment.js';
+import { canEquip } from '../items/equipment.js';
 import { slotsForType, getItemDef } from '../../content/items/index.js';
 import { ELEMENTS } from '../../content/elements.js';
 import { EVENTS } from '../../content/events.js';

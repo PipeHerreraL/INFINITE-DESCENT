@@ -195,6 +195,14 @@
   }
 }
 
+.obstacle {
+  transition: opacity 0.2s ease;
+}
+
+.obstacle.see-through {
+  opacity: 0.45;
+}
+
 .path-dot {
   fill: #e9ffd9;
   stroke: #2f8a1f;

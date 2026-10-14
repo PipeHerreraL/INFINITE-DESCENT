@@ -227,6 +227,13 @@ export default function Board({
   }
   objects.sort((a, b) => a.depth - b.depth || a.sub - b.sub);
 
+  // Un obstáculo que tapa a una unidad situada detrás se vuelve translúcido.
+  const occluding = (c) => units.some((u) => {
+    const p = pos[u.id] ?? u;
+    const ahead = c.x + c.y - (p.x + p.y);
+    return ahead >= 1 && ahead <= 3 && Math.abs(c.x - c.y - (p.x - p.y)) <= 1;
+  });
+
   const hl = highlights ?? {};
   const previewByUnit = Object.fromEntries(previews.map((p) => [p.unitId, p]));
 
@@ -301,7 +308,7 @@ export default function Board({
           if (o.kind === 'obstacle') {
             const { px, py } = project(o.c.x, o.c.y);
             return (
-              <g key={`o${o.c.k}`} transform={`translate(${px} ${py})`} pointerEvents="none">
+              <g key={`o${o.c.k}`} transform={`translate(${px} ${py})`} pointerEvents="none" className={occluding(o.c) ? 'obstacle see-through' : 'obstacle'}>
                 <Decor kind={board.decor?.[o.c.k]} pal={pal} />
               </g>
             );

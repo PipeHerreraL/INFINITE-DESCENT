@@ -167,3 +167,75 @@ un tope global de profundidad y un presupuesto de disparos por acción.
 - Por defecto, la duración de un estado se descuenta al final del turno de quien lo
   sufre. Los beneficios que alguien se aplica a sí mismo no se descuentan en el turno
   en que se lanzan.
+
+## 7. Estado de la primera versión
+
+Los 17 puntos del alcance mínimo están implementados y conectados en la interfaz:
+
+| # | Requisito | Dónde |
+|---|-----------|-------|
+| 1 | Selección entre tres clases | `ClassSelectScreen`, `content/classes` |
+| 2 | Inicio de expedición | `core/run/run.js` (`createRun`) |
+| 3 | Tablero táctico | `core/grid`, `ui/board/Board.jsx` |
+| 4 | Movimiento y hechizos | `core/combat/movement.js`, `spellcast.js` |
+| 5 | Enemigos con IA | `core/combat/ai/ai.js` |
+| 6 | Victoria y derrota | `core/combat/turns.js` (`checkEnd`) |
+| 7 | Recompensas | `core/run/rewards.js`, `RewardView` |
+| 8 | Equipo con estadísticas y efectos | `core/items`, `content/items` |
+| 9 | Sets (4) | `content/items/sets.js`, `core/items/sets.js` |
+| 10 | Reliquias con sinergias (20) | `content/relics.js` |
+| 11 | Inventario y sustitución | `core/items/equipment.js`, `CharacterSheet` |
+| 12 | Mercader y forja | `core/run/shop.js`, `forge.js` |
+| 13 | Varios pisos | `core/run/mapgen.js` (2 × 8 + Descenso Infinito) |
+| 14 | Jefe con mecánica especial | Bramador (carga anunciada + pilares) y Tejedora (redes + huevos) |
+| 15 | Final de expedición | `VictoryView`, `RunEndView` |
+| 16 | Persistencia de desbloqueos | `core/meta/persistence.js` |
+| 17 | Interfaz coherente | `ui/` |
+
+### Validación
+
+- `npm test`: 83 pruebas. Cubren PA y PM, validaciones de hechizos, línea de
+  visión, placaje, daño y resistencias, escudos, colisiones, estados, turnos,
+  victoria y derrota, sinergias, prevención de bucles, bombas, recálculo de
+  estadísticas, activación de sets, restricciones de equipo, recompensas aplicadas
+  una sola vez, compras sin fondos, forja, mapa reproducible, persistencia, reinicio
+  sin mejoras temporales y validación de todo el contenido.
+- `npm run sim`: un jugador automático juega expediciones completas con las mismas
+  reglas que la interfaz. Sirve para detectar bloqueos y medir el equilibrio.
+
+### Equilibrio inicial (simulador, 20 expediciones por clase, dificultad 0)
+
+| Clase | Gana al jefe del estrato I | Supera el estrato I | Victorias totales |
+|---|---|---|---|
+| Furiak | 20 % | 3/20 | 1/20 |
+| Ensalmador | 52 % | 11/20 | 3/20 |
+| Petardista | 25 % | 6/20 | 0/20 |
+
+El jugador automático no aprovecha a propósito el pilar contra Bramador, se cura
+mal y elige dones al azar. Por eso estas cifras son una **cota inferior**: un
+jugador humano debería superarlas con claridad. Los combates normales se ganan casi
+siempre (pierden en torno al 20 % de la vida) y el riesgo se concentra en élites y
+jefes. El equilibrio necesita sesiones de juego reales.
+
+## 8. Pendiente y limitaciones conocidas
+
+No se ha sustituido nada por funcionalidad falsa. Lo que falta, documentado:
+
+- **Contenido:** 3 clases, 2 estratos con jefe y unos 50 objetos. La arquitectura
+  admite más sin tocar el motor.
+- **Invocaciones controladas por el jugador:** en Dofus el jugador las controla; aquí
+  las maneja la IA para simplificar la interfaz.
+- **Placaje simplificado:** solo resta PM (en Dofus también resta PA).
+- **Trampas y glifos persistentes en casillas:** no existen como sistema propio. Los
+  ataques anunciados cubren parte de ese papel.
+- **Consumibles en combate:** no hay pociones usables durante el combate; la
+  curación se compra en el mercader.
+- **Audio:** sin música ni efectos de sonido.
+- **Arte:** formas SVG provisionales, pensadas para sustituirse por arte definitivo.
+- **Pantallas pequeñas:** el combate está pensado para escritorio (más de 1100 px).
+  En pantallas estrechas los paneles se apilan, pero no hay controles táctiles
+  específicos.
+- **Idioma:** los textos del contenido están en español y dentro de los datos; falta
+  una capa de localización.
+- **IA:** evalúa la mejor acción inmediata sin anticipar turnos futuros. Los jefes
+  usan telegrafía y fases, no planificación profunda.

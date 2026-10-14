@@ -1,11 +1,11 @@
 import { dist, key, areaCells, isFloor, DIRS } from '../../grid/geometry.js';
 import { distanceField } from '../../grid/pathfinding.js';
-import { getStats, unitAt, enemiesOf, alliesOf, adjacentEnemies, totalShield, livingUnits, hasStatus } from '../state.js';
+import { unitAt, enemiesOf, alliesOf, adjacentEnemies, totalShield, hasStatus } from '../state.js';
 import { movementMap } from '../movement.js';
 import { canCast, effectiveRange } from '../spellcast.js';
 import { computeDamage, computeHeal } from '../damage.js';
 import { bombsOf, explosionEffects, BOMB_AREA } from '../bombs.js';
-import { chargeLine, telegraphCells } from '../telegraph.js';
+import { telegraphCells } from '../telegraph.js';
 import { STATUSES } from '../../../content/statuses.js';
 
 // IA por utilidad: para cada hechizo, casilla desde la que lanzarlo (alcanzable
@@ -338,4 +338,3 @@ export function decideAction(combat, unitId) {
   return { type: 'endTurn' };
 }
 
-export { chargeLine, livingUnits, getStats };

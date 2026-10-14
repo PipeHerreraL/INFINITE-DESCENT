@@ -1,10 +1,8 @@
 import { STATUSES } from '../../content/statuses.js';
 import { chance, shuffle } from '../rng.js';
 import { resolveValue } from '../effects/values.js';
-import { areaCells, direction, isFloor, dist, DIRS, key } from '../grid/geometry.js';
-import {
-  unitAt, livingUnits, enemiesOf, alliesOf, getStats, addFx, addLog, statusFlag,
-} from './state.js';
+import { areaCells, direction, isFloor, dist, key } from '../grid/geometry.js';
+import { unitAt, enemiesOf, alliesOf, getStats, addFx, addLog, statusFlag } from './state.js';
 import { computeDamage, computeHeal, applyDamage, applyHeal, applyShield, killUnit, resolveElement, COLLISION_BASE } from './damage.js';
 import { applyStatus, removeStatus } from './statuses.js';
 import { fireTriggers } from './triggers.js';
@@ -392,9 +390,3 @@ export function executeEffects(combat, effects, ctx) {
 
 export const EFFECT_TYPES = Object.keys(EXECUTORS);
 
-/** Unidades de un bando vivas que no son bombas (utilidad para IA/UI). */
-export function combatants(combat, side) {
-  return livingUnits(combat).filter((u) => u.side === side && u.kind !== 'bomb');
-}
-
-export { DIRS };

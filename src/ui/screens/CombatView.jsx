@@ -5,12 +5,12 @@ import { STATS } from '../../content/stats.js';
 import { ELEMENTS } from '../../content/elements.js';
 import { COMBAT_MODIFIERS } from '../../content/modifiers.js';
 import { MONSTERS } from '../../content/enemies/index.js';
-import { key, areaCells } from '../../core/grid/geometry.js';
+import { key } from '../../core/grid/geometry.js';
 import { pathFromReach } from '../../core/grid/pathfinding.js';
 import { movementMap } from '../../core/combat/movement.js';
-import { rangeCells, previewSpell, effectiveRange, canCast } from '../../core/combat/spellcast.js';
+import { rangeCells, previewSpell, effectiveRange } from '../../core/combat/spellcast.js';
 import { telegraphCells } from '../../core/combat/telegraph.js';
-import { unitAt, getStats, totalShield, enemiesOf } from '../../core/combat/state.js';
+import { unitAt, getStats, totalShield } from '../../core/combat/state.js';
 import { bombsOf } from '../../core/combat/bombs.js';
 import { describeTrigger } from '../text/describe.js';
 import Board from '../board/Board.jsx';
@@ -341,7 +341,6 @@ function UnitPanel({ unit, combat }) {
         <div key={s.id} className="tiny dim">✦ {s.name}: {s.triggers.map(describeTrigger).join(' ')}</div>
       ))}
       {def?.tier === 'boss' ? <div className="tiny boss-tip">{def.desc}</div> : null}
-      {unit.kind === 'hero' && enemiesOf(combat, unit).length === 0 ? null : null}
     </div>
   );
 }
@@ -385,4 +384,3 @@ function EndOverlay({ combat }) {
   );
 }
 
-export { canCast, areaCells };

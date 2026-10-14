@@ -57,7 +57,8 @@ export function generateActMap(rng, act, { eliteWeightMult = 1 } = {}) {
     }
     // Mercader garantizado a mitad del estrato.
     if (r === Math.floor((rows - 1) / 2) && !rowNodes.some((n) => n.type === 'shop')) {
-      pick(rng, rowNodes).type = 'shop';
+      const candidates = rowNodes.filter((n) => !parents(n.id).some((p) => p.type === 'shop') && !n.next.some((id) => nodes[id]?.type === 'shop'));
+      pick(rng, candidates.length ? candidates : rowNodes).type = 'shop';
     }
   }
   // Forja garantizada en algún nodo intermedio.
