@@ -21,7 +21,7 @@ export default function ShopView({ onOpenSheet }) {
   return (
     <div className="room shop">
       <div className="room-head">
-        <Portrait sprite={{ shape: 'kobold', color: '#2a9d8f', accent: '#f4a261' }} size={64} />
+        <Portrait sprite={{ art: 'mercader', shape: 'kobold', color: '#2a9d8f', accent: '#f4a261' }} size={72} />
         <div className="grow">
           <h2>El Mercader Errante</h2>
           <div className="dim small">«Todo lo que ves, a un precio justo… para mí». Tienes <b className="gold-text">{run.kamas}</b> kamas.</div>

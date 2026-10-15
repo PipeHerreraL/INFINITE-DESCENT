@@ -16,6 +16,7 @@ import { bombsOf } from '../../core/combat/bombs.js';
 import { describeTrigger } from '../text/describe.js';
 import Board from '../board/Board.jsx';
 import { Portrait } from '../board/UnitSprite.jsx';
+import { unitSprite } from '../board/spriteArt.js';
 import { Bar, Tip, Modal } from '../components/Common.jsx';
 import { useCompactUI, useTouchUI } from '../hooks/useMedia.js';
 import { SpellCard, SpellIcon } from '../components/SpellCard.jsx';
@@ -375,7 +376,7 @@ function Timeline({ combat, onInspect }) {
       {order.map((u) => (
         <Tip key={u.id} content={`${u.name} — ${u.hp}/${u.maxHp} PV`}>
           <button type="button" className={`tl-unit ${u.side} ${combat.activeId === u.id ? 'active' : ''}`} onClick={() => onInspect(u.id)}>
-            <Portrait sprite={u.sprite} size={38} />
+            <Portrait sprite={unitSprite(u)} size={38} />
             <div className="tl-hp"><div style={{ width: `${(u.hp / u.maxHp) * 100}%` }} /></div>
           </button>
         </Tip>
@@ -403,7 +404,7 @@ function UnitPanel({ unit, combat }) {
   return (
     <div className="unit-panel panel-dark">
       <div className="row" style={{ gap: 8 }}>
-        <Portrait sprite={unit.sprite} size={52} charge={unit.charge} />
+        <Portrait sprite={unitSprite(unit)} size={52} charge={unit.charge} />
         <div className="grow">
           <div className={`unit-name ${unit.side}`}>{unit.name}</div>
           <div className="tiny dim">

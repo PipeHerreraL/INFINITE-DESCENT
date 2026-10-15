@@ -266,7 +266,7 @@ function spriteScale(sprite) {
 /** Altura de la parte superior del sprite (y negativa), para la barra de vida y los textos. */
 export function spriteTop(sprite) {
   const scale = spriteScale(sprite);
-  const art = sprite?.shape === 'bomb' ? null : artFor(sprite);
+  const art = artFor(sprite);
   if (art) return -((art.h + (art.lift ?? 0)) * scale + 2);
   return sprite?.boss ? -82 : sprite?.big ? -66 : sprite?.small ? -40 : -54;
 }
@@ -291,13 +291,27 @@ function ArtSprite({ art, maxW }) {
   );
 }
 
+/** Puntos de carga bajo una bomba (máximo 5). */
+function ChargePips({ charge = 0 }) {
+  return (
+    <g>
+      {[0, 1, 2, 3, 4].slice(0, Math.max(0, Math.min(5, charge))).map((i) => (
+        <circle key={i} cx={-8 + i * 4} cy="4" r="1.8" fill="#ffd166" stroke={OUTLINE} strokeWidth="0.6" />
+      ))}
+    </g>
+  );
+}
+
 export default function UnitSprite({ sprite, charge, maxW = 2 }) {
   const scale = spriteScale(sprite);
-  const art = sprite?.shape === 'bomb' ? null : artFor(sprite);
+  const art = artFor(sprite);
   if (art) {
     return (
       <g transform={`scale(${scale})`}>
-        <ArtSprite art={art} maxW={maxW} />
+        <g className={sprite?.shape === 'bomb' ? 'bomb-art' : undefined}>
+          <ArtSprite art={art} maxW={maxW} />
+        </g>
+        {sprite?.shape === 'bomb' ? <ChargePips charge={charge} /> : null}
       </g>
     );
   }
@@ -312,7 +326,7 @@ export default function UnitSprite({ sprite, charge, maxW = 2 }) {
 /** Retrato pequeño para listas (línea de turnos, cartas). */
 export function Portrait({ sprite, size = 40, charge }) {
   const scale = spriteScale(sprite);
-  const art = sprite?.shape === 'bomb' ? null : artFor(sprite);
+  const art = artFor(sprite);
   if (art) {
     // Encuadre cuadrado: la ilustración completa, de los pies a la cabeza.
     const h = (art.h + (art.lift ?? 0)) * scale;

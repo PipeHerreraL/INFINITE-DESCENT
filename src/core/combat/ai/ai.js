@@ -1,5 +1,5 @@
-import { dist, key, areaCells, isFloor, DIRS } from '../../grid/geometry.js';
-import { distanceField } from '../../grid/pathfinding.js';
+import { dist, key, areaCells, isFloor, DIRS, inLine, hasLineOfSight, cellsInRange } from '../../grid/geometry.js';
+import { distanceField, multiSourceField } from '../../grid/pathfinding.js';
 import { unitAt, enemiesOf, alliesOf, adjacentEnemies, totalShield, hasStatus } from '../state.js';
 import { movementMap } from '../movement.js';
 import { canCast, effectiveRange } from '../spellcast.js';
@@ -247,44 +247,99 @@ function bestCast(combat, unit) {
   return best;
 }
 
+/** Hechizos con los que la unidad ataca: deciden hacia dónde se mueve. */
+function attackSpells(unit) {
+  return unit.spells.filter((s) => !s.telegraph
+    && ['enemy', 'cell', 'unit'].includes(s.target)
+    && s.effects.some((e) => e.type === 'damage' || e.type === 'push' || e.type === 'pull' || (e.type === 'status' && STATUSES[e.status]?.kind !== 'buff')));
+}
+
+/**
+ * Casillas libres desde las que la unidad podría atacar a algún enemigo con
+ * alguno de sus hechizos: alcance, línea recta si la exige y línea de visión.
+ * Valor 0 si el objetivo es el héroe (prioritario) y 1 para el resto.
+ */
+function attackPositions(combat, unit, foes) {
+  const out = new Map();
+  const free = (x, y) => {
+    if (!isFloor(combat.board, x, y)) return false;
+    const u = unitAt(combat, x, y);
+    return !u || u.id === unit.id;
+  };
+  for (const spell of attackSpells(unit)) {
+    const r = effectiveRange(unit, spell);
+    for (const f of foes) {
+      const w = f.kind === 'hero' ? 0 : 1;
+      for (const c of cellsInRange(combat.board, f, r.min, r.max)) {
+        const k = key(c.x, c.y);
+        if ((out.get(k) ?? 2) <= w || !free(c.x, c.y)) continue;
+        if (spell.inLine && !inLine(c, f)) continue;
+        if (spell.los) {
+          const occupied = (x, y) => {
+            if (x === c.x && y === c.y) return false;
+            const u = unitAt(combat, x, y);
+            return !!u && u.id !== unit.id;
+          };
+          if (!hasLineOfSight(combat.board, c, f, occupied)) continue;
+        }
+        out.set(k, w);
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Movimiento cuando no hay nada que lanzar este turno. Se avanza por el camino
+ * más corto (no en línea recta) hacia la posición de ataque más cercana, así
+ * que se rodean paredes, agujeros y otras unidades. Si los aliados tapan el
+ * paso, se usa el camino del terreno para no quedarse quieto.
+ */
 function bestMove(combat, unit) {
   const { reach } = movementMap(combat, unit);
   if (reach.size <= 1) return null;
   const foes = targetsFor(combat, unit);
   if (!foes.length) return null;
   const threatened = threatenedCells(combat, unit);
-  const blocked = (x, y) => {
+  const occupiedByOther = (x, y) => {
     const u = unitAt(combat, x, y);
     return !!u && u.id !== unit.id;
   };
+  const terrainOnly = () => false;
   const profile = unit.ai?.profile ?? 'melee';
   const pref = unit.ai?.preferredRange ?? (profile === 'melee' || profile === 'boss' ? 1 : 4);
-  const fields = foes.map((f) => {
-    const field = distanceField(combat.board, f, (x, y) => blocked(x, y) && !(x === f.x && y === f.y));
-    return { f, field };
-  });
   const allies = alliesOf(combat, unit).filter((a) => a.id !== unit.id && a.kind !== 'bomb');
+
+  const targets = attackPositions(combat, unit, foes);
+  const viaUnits = multiSourceField(combat.board, targets, occupiedByOther);
+  const viaTerrain = multiSourceField(combat.board, targets, terrainOnly);
+  const approach = multiSourceField(combat.board, new Map(foes.map((f) => [key(f.x, f.y), f.kind === 'hero' ? 0 : 1])), terrainOnly);
+
+  /** Pasos hasta poder atacar desde la casilla `c` (cuanto menos, mejor). */
+  const stepsToAttack = (c) => {
+    const k = key(c.x, c.y);
+    if (viaUnits.has(k)) return viaUnits.get(k);
+    if (viaTerrain.has(k)) return viaTerrain.get(k) + 4;
+    if (approach.has(k)) return approach.get(k) + 8;
+    return Math.min(...foes.map((f) => dist(c, f))) + 12;
+  };
 
   const scoreCell = (c) => {
     let s = positionScore(combat, unit, c, threatened);
+    const nearestFoe = Math.min(...foes.map((f) => dist(c, f)));
     if (unit.ai?.healer) {
       const hurt = allies.filter((a) => a.hp < a.maxHp).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0] ?? allies[0];
-      if (hurt) s -= Math.abs(dist(c, hurt) - 2) * 3;
-      const nearestFoe = Math.min(...foes.map((f) => dist(c, f)));
+      if (hurt) {
+        const toHurt = distanceField(combat.board, hurt, terrainOnly).get(key(c.x, c.y)) ?? dist(c, hurt) + 6;
+        s -= Math.abs(toHurt - 2) * 3;
+      }
       if (nearestFoe <= 2) s -= (3 - nearestFoe) * 6;
       return s - c.dist * 0.1;
     }
-    let minPath = Infinity;
-    let minManhattan = Infinity;
-    for (const { f, field } of fields) {
-      const pd = field.get(key(c.x, c.y));
-      const w = f.kind === 'hero' ? 0 : 1;
-      if (pd !== undefined) minPath = Math.min(minPath, pd + w);
-      minManhattan = Math.min(minManhattan, dist(c, f));
-    }
-    if (minPath === Infinity) minPath = minManhattan + 6;
-    if (pref <= 1) s -= minPath * 10;
-    else s -= Math.abs(minManhattan - pref) * 6 + (minManhattan < pref ? 4 : 0);
+    const steps = stepsToAttack(c);
+    s -= steps * 10;
+    // Ya en posición: los de distancia prefieren quedarse a su alcance cómodo.
+    if (steps === 0 && pref > 1) s -= Math.abs(nearestFoe - pref) * 2 + (nearestFoe < pref ? 3 : 0);
     return s - c.dist * 0.1;
   };
 

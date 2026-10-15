@@ -72,3 +72,37 @@ export function distanceField(board, start, blocked) {
   }
   return out;
 }
+
+/**
+ * Distancia por camino desde varios orígenes a la vez. `sources` asocia cada
+ * casilla («x,y») con su distancia inicial (0 o 1: los de 1 cuentan como un
+ * paso más lejos). Devuelve un Map «x,y» → pasos.
+ */
+export function multiSourceField(board, sources, blocked) {
+  const out = new Map();
+  const queue = [];
+  const ordered = [...sources.entries()].sort((a, b) => a[1] - b[1]);
+  for (const [k, d] of ordered) {
+    if (out.has(k)) continue;
+    out.set(k, d);
+    const [x, y] = k.split(',').map(Number);
+    queue.push({ x, y });
+  }
+  let head = 0;
+  while (head < queue.length) {
+    const cur = queue[head++];
+    const cd = out.get(key(cur.x, cur.y));
+    for (const d of DIRS) {
+      const nx = cur.x + d.x;
+      const ny = cur.y + d.y;
+      const nk = key(nx, ny);
+      if (out.has(nk)) continue;
+      if (!isFloor(board, nx, ny)) continue;
+      if (blocked(nx, ny)) continue;
+      out.set(nk, cd + 1);
+      queue.push({ x: nx, y: ny });
+    }
+  }
+  return out;
+}
+

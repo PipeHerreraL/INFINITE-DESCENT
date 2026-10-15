@@ -101,24 +101,68 @@ export function lineCells(a, b) {
   return out;
 }
 
+/** Parte de cada lado de la casilla que no cuenta para tapar la visión. */
+export const LOS_MARGIN = 0.2;
+
+/** ¿El segmento A→B atraviesa el interior del rectángulo [x0,x1]×[y0,y1]? (Liang–Barsky) */
+function segmentCrossesRect(ax, ay, bx, by, x0, y0, x1, y1) {
+  let t0 = 0;
+  let t1 = 1;
+  const dx = bx - ax;
+  const dy = by - ay;
+  const p = [-dx, dx, -dy, dy];
+  const q = [ax - x0, x1 - ax, ay - y0, y1 - ay];
+  for (let i = 0; i < 4; i++) {
+    if (p[i] === 0) {
+      if (q[i] <= 1e-9) return false;
+      continue;
+    }
+    const r = q[i] / p[i];
+    if (p[i] < 0) {
+      if (r > t1) return false;
+      if (r > t0) t0 = r;
+    } else {
+      if (r < t0) return false;
+      if (r < t1) t1 = r;
+    }
+  }
+  return t1 - t0 > 1e-9;
+}
+
 /**
- * Línea de visión: bloquean los obstáculos y las unidades en casillas
- * intermedias. Los agujeros no bloquean la visión.
- * `isOccupied(x, y)` indica si hay una unidad en la casilla.
+ * Línea de visión entre los centros de dos casillas. Bloquean los obstáculos,
+ * las casillas fuera del tablero y las unidades en casillas intermedias
+ * (`isOccupied(x, y)`); los agujeros no bloquean.
+ *
+ * Cada bloqueo ocupa el centro de su casilla (sin un margen de LOS_MARGIN por
+ * lado), así que rozar una esquina o un borde no tapa la visión: se puede
+ * disparar en diagonal junto a un obstáculo. Dos bloqueos vecinos (de lado o
+ * en diagonal) forman un muro continuo, sin rendijas. Es simétrica.
  */
 export function hasLineOfSight(board, from, to, isOccupied) {
   if (from.x === to.x && from.y === to.y) return true;
-  const blocks = (c) => {
-    if (c.x === to.x && c.y === to.y) return false;
-    const t = cellType(board, c.x, c.y);
+  const m = LOS_MARGIN;
+  const blocks = (x, y) => {
+    if ((x === to.x && y === to.y) || (x === from.x && y === from.y)) return false;
+    const t = cellType(board, x, y);
     if (t === undefined || t === 'obstacle') return true;
-    return isOccupied(c.x, c.y);
+    return isOccupied(x, y);
   };
-  for (const entry of lineCells(from, to)) {
-    if (entry.corner) {
-      if (blocks(entry.corner[0]) && blocks(entry.corner[1])) return false;
-    } else if (blocks(entry)) {
-      return false;
+  const hits = (x0, y0, x1, y1) => segmentCrossesRect(from.x, from.y, to.x, to.y, x0, y0, x1, y1);
+  const minX = Math.min(from.x, to.x) - 1;
+  const maxX = Math.max(from.x, to.x) + 1;
+  const minY = Math.min(from.y, to.y) - 1;
+  const maxY = Math.max(from.y, to.y) + 1;
+  for (let x = minX; x <= maxX; x++) {
+    for (let y = minY; y <= maxY; y++) {
+      if (!blocks(x, y)) continue;
+      // El bloqueo en sí.
+      if (hits(x - 0.5 + m, y - 0.5 + m, x + 0.5 - m, y + 0.5 - m)) return false;
+      // Puentes con los bloqueos vecinos: derecha, abajo y las dos diagonales.
+      if (blocks(x + 1, y) && hits(x + 0.5 - m, y - 0.5 + m, x + 0.5 + m, y + 0.5 - m)) return false;
+      if (blocks(x, y + 1) && hits(x - 0.5 + m, y + 0.5 - m, x + 0.5 - m, y + 0.5 + m)) return false;
+      if (blocks(x + 1, y + 1) && hits(x + 0.5 - m, y + 0.5 - m, x + 0.5 + m, y + 0.5 + m)) return false;
+      if (blocks(x + 1, y - 1) && hits(x + 0.5 - m, y - 0.5 - m, x + 0.5 + m, y - 0.5 + m)) return false;
     }
   }
   return true;

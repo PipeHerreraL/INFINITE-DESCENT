@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { MONSTERS } from '../../content/enemies/index.js';
 import { CLASSES, CLASS_ORDER } from '../../content/classes/index.js';
 import UnitSprite from '../board/UnitSprite.jsx';
+import { unitSprite } from '../board/spriteArt.js';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/board.css';
@@ -15,7 +16,13 @@ const DIAMOND = `0,${-TH / 2} ${TW / 2},0 0,${TH / 2} ${-TW / 2},0`;
 const entries = [
   ...CLASS_ORDER.map((id) => ({ id, name: CLASSES[id].name, sprite: { shape: CLASSES[id].sprite, color: CLASSES[id].color } })),
   ...Object.values(MONSTERS).map((m) => ({ id: m.id, name: m.name, sprite: m.sprite })),
-  { id: 'bomba', name: 'Bomba (fuego, carga 2)', sprite: { shape: 'bomb', color: '#ef5b3a' }, charge: 2 },
+  ...['earth', 'fire', 'water', 'air', 'neutral'].map((element, i) => ({
+    id: `bomba-${element}`,
+    name: `Bomba (${element}, carga ${i})`,
+    sprite: unitSprite({ kind: 'bomb', element, sprite: { shape: 'bomb' } }),
+    charge: i,
+  })),
+  { id: 'mercader', name: 'Mercader', sprite: { art: 'mercader' } },
 ];
 
 function Tile({ entry, zoom }) {

@@ -3,6 +3,8 @@
 // scripts/sprites/cut_sheet.py. Las unidades sin ilustración usan el sprite
 // vectorial de UnitSprite.jsx.
 
+import { MONSTERS } from '../../content/enemies/index.js';
+
 const files = import.meta.glob('../../assets/sprites/*.webp', { eager: true, query: '?url', import: 'default' });
 const url = (name) => files[`../../assets/sprites/${name}.webp`];
 
@@ -31,6 +33,11 @@ const ART = {
   sombraOnirica: { h: 52, lift: 6 },
   golemAncestral: { h: 62 },
   conejoSanador: { h: 40 },
+  mercader: { h: 56 },
+  bombaTierra: { h: 34 },
+  bombaFuego: { h: 34 },
+  bombaAgua: { h: 34 },
+  bombaAire: { h: 34 },
 };
 
 // Variantes provisionales: reutilizan una ilustración con otro color (y altura `h`, si se indica).
@@ -40,7 +47,11 @@ const VARIANTS = {
   aranita: { from: 'aranaTejedora', filter: 'saturate(0.5) brightness(1.2)' },
   bramador: { from: 'jabaliAcorazado', filter: 'sepia(0.25) saturate(1.5) hue-rotate(-12deg) brightness(0.85)' },
   tejedora: { from: 'aranaTejedora', h: 54, filter: 'hue-rotate(45deg) saturate(1.4) brightness(0.9)' },
+  bombaNeutra: { from: 'bombaTierra', filter: 'grayscale(0.9) brightness(1.05)' },
 };
+
+// Cada bomba muestra la ilustración de su elemento.
+const BOMB_ART = { earth: 'bombaTierra', fire: 'bombaFuego', water: 'bombaAgua', air: 'bombaAire' };
 
 // Los héroes se identifican por la forma de su clase.
 const HERO_ART = { warrior: 'furiak', healer: 'ensalmador', bomber: 'petardista' };
@@ -58,3 +69,15 @@ export function artFor(sprite) {
 }
 
 export const SPRITE_ART_IDS = [...Object.keys(ART), ...Object.keys(VARIANTS)];
+
+/**
+ * Sprite con el que se dibuja una unidad de combate. Las bombas eligen la
+ * ilustración de su elemento; los monstruos de partidas guardadas antes de
+ * que existieran las ilustraciones toman el sprite actual de su definición.
+ */
+export function unitSprite(u) {
+  if (!u) return null;
+  if (u.kind === 'bomb') return { ...u.sprite, shape: 'bomb', art: BOMB_ART[u.element] ?? 'bombaNeutra' };
+  if (!u.sprite?.art && u.defId && MONSTERS[u.defId]?.sprite) return MONSTERS[u.defId].sprite;
+  return u.sprite;
+}

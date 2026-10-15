@@ -232,11 +232,11 @@ No se ha sustituido nada por funcionalidad falsa. Lo que falta, documentado:
 - **Consumibles en combate:** no hay pociones usables durante el combate; la
   curación se compra en el mercader.
 - **Audio:** sin música ni efectos de sonido.
-- **Arte:** los héroes y 16 monstruos tienen ilustración propia (IA de imágenes de
-  Canva, recortada con `scripts/sprites/cut_sheet.py`). Setita, Bloblín pequeño,
-  Arañita, Bramador y la Tejedora reutilizan una ilustración con otro color o tamaño
-  de forma provisional: los dos jefes merecen arte propio cuando haya créditos de
-  generación. Siguen en SVG el saco de huevos, las bombas y el mercader.
+- **Arte:** los héroes, 16 monstruos, las bombas (una por elemento) y el mercader
+  tienen ilustración propia (IA de imágenes de Canva, recortada con
+  `scripts/sprites/cut_sheet.py`). Setita, Bloblín pequeño, Arañita, Bramador y la
+  Tejedora reutilizan una ilustración con otro color o tamaño de forma provisional:
+  los dos jefes merecen arte propio. Solo el saco de huevos sigue en SVG.
 - **Móvil:** la interfaz se adapta a móvil en vertical y en horizontal y a pantallas
   táctiles (ver sección 9). No hay modo sin conexión (no se usa *service worker*):
   la primera carga necesita red.
@@ -284,4 +284,21 @@ No se ha sustituido nada por funcionalidad falsa. Lo que falta, documentado:
   GitHub Pages en cada push a la rama por defecto. `public/manifest.webmanifest` y
   los iconos permiten instalar el juego en la pantalla de inicio. Las rutas son
   relativas, así que funciona bajo `/<repositorio>/`.
+
+## 10. Línea de visión e IA de movimiento
+
+- **Línea de visión** (`hasLineOfSight` en `src/core/grid/geometry.js`): se traza
+  entre los centros de las casillas. Cada bloqueo (obstáculo, unidad o borde del
+  tablero) ocupa el centro de su casilla, sin un margen de `LOS_MARGIN` (20 %) por
+  lado. Rozar una esquina o un borde no tapa: se puede disparar en diagonal junto a
+  un obstáculo, y una unidad al lado proyecta un cono de sombra estrecho y no media
+  zona del mapa. Dos bloqueos vecinos, de lado o en diagonal, forman un muro sin
+  rendijas. La regla es simétrica y los agujeros no bloquean.
+- **Movimiento de la IA** (`bestMove` en `src/core/combat/ai/ai.js`): cuando no
+  puede lanzar nada este turno, cada enemigo calcula sus *posiciones de ataque*:
+  casillas libres desde las que alcanzaría a un enemigo con alguno de sus hechizos,
+  respetando el alcance, la línea recta y la línea de visión. Avanza por el camino
+  más corto hacia la más cercana con una búsqueda desde todas a la vez, así que
+  rodea paredes y agujeros. Si otros monstruos tapan el paso, usa el camino del
+  terreno. Los de distancia, ya en posición, prefieren su alcance cómodo.
 
